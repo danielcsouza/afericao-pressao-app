@@ -50,10 +50,7 @@ class Shell extends ConsumerWidget {
                 ),
               ),
             ),
-            _BottomBar(
-              index: tab,
-              middleLabel: '$days ${days == 1 ? 'dia' : 'dias'}',
-            ),
+            _BottomBar(index: tab),
           ],
         ),
       ),
@@ -118,14 +115,13 @@ class _Header extends StatelessWidget {
 }
 
 class _BottomBar extends ConsumerWidget {
-  const _BottomBar({required this.index, required this.middleLabel});
+  const _BottomBar({required this.index});
   final int index;
-  final String middleLabel;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    final items = [('✍️', 'Anotar'), ('📅', middleLabel), ('⚙️', 'Mais')];
+    final items = [('✍️', 'Anotar'), ('📅', 'Agenda'), ('⚙️', 'Mais')];
     return Material(
       color: c.headerColor,
       elevation: 8,

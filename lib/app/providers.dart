@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/storage.dart';
 import '../domain/dates.dart';
 import '../domain/models.dart';
+import '../domain/reminders.dart';
 import '../domain/rules.dart';
+import '../notifications/notification_service.dart';
 
 /// Sobrescrito em `main` com a instância já carregada.
 final storageProvider = Provider<Storage>((ref) => throw UnimplementedError());
@@ -99,3 +102,36 @@ class TabNotifier extends Notifier<int> {
 }
 
 final tabProvider = NotifierProvider<TabNotifier, int>(TabNotifier.new);
+
+/// Sobrescrito em `main` pelo serviço real; nos testes não faz nada.
+final notificationServiceProvider = Provider<NotificationService>(
+  (ref) => const NoopNotificationService(),
+);
+
+/// Mantém os lembretes agendados em dia com o caderno. Só chama o serviço
+/// quando a lista planejada muda (digitar valores quase nunca muda).
+class ReminderSyncer {
+  ReminderSyncer(this._ref);
+  final Ref _ref;
+  List<PlannedReminder>? _last;
+
+  void run([Notebook? nb]) {
+    final plan = plannedReminders(
+      nb ?? _ref.read(notebookProvider),
+      DateTime.now(),
+    );
+    if (_last != null && listEquals(plan, _last)) return;
+    _last = plan;
+    _ref.read(notificationServiceProvider).sync(plan);
+  }
+}
+
+final reminderSyncProvider = Provider<ReminderSyncer>((ref) {
+  final syncer = ReminderSyncer(ref);
+  ref.listen(
+    notebookProvider,
+    (_, nb) => syncer.run(nb),
+    fireImmediately: true,
+  );
+  return syncer;
+});

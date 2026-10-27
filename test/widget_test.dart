@@ -29,7 +29,7 @@ void main() {
 
     expect(find.text('Dia 1 de 30'), findsWidgets); // cabeçalho e aba Anotar
     expect(find.text('0%'), findsOneWidget);
-    expect(find.text('30 dias'), findsOneWidget);
+    expect(find.text('Agenda'), findsOneWidget);
 
     await tester.tap(find.text('Mais'));
     await tester.pumpAndSettle();

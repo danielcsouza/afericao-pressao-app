@@ -151,12 +151,20 @@ class _RemindersPanel extends ConsumerWidget {
       children: [
         SegButtons<bool>(
           value: cfg.remindersOn,
-          onChanged: (v) => update(cfg.copyWith(remindersOn: v)),
+          onChanged: (v) {
+            update(cfg.copyWith(remindersOn: v));
+            if (v) ref.read(notificationServiceProvider).requestPermission();
+          },
           options: const [(true, 'Avisar'), (false, 'Não avisar')],
         ),
         PanelText(
           'Se até o horário ainda não houver anotação no período, o app '
           'avisa uma vez.',
+        ),
+        AppButton(
+          '🔔 Enviar notificação de teste',
+          kind: AppButtonKind.ghost,
+          onTap: () => testNotifications(context, ref),
         ),
         if (cfg.remindersOn)
           for (final p in cfg.periods)

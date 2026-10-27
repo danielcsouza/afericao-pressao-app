@@ -343,7 +343,12 @@ class _WizardState extends ConsumerState<Wizard> {
             children: [
               _Options<bool>(
                 value: _remindersOn,
-                onChanged: (v) => setState(() => _remindersOn = v),
+                onChanged: (v) {
+                  setState(() => _remindersOn = v);
+                  if (v) {
+                    ref.read(notificationServiceProvider).requestPermission();
+                  }
+                },
                 options: const [(true, 'Avisar'), (false, 'Não avisar')],
               ),
               if (_remindersOn)
