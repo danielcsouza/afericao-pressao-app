@@ -1,0 +1,1122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pressão Arterial</title>
+<meta name="description" content="Registro de pressão arterial por 30 dias">
+<meta name="theme-color" content="#c0392b" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#7a2018" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pressão">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+(function(){try{var t=localStorage.getItem('pressao.theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
+<style>
+:root{
+  color-scheme:light dark;
+  --bg:#fbf7f6; --card:#ffffff; --ink:#2a1f1f; --muted:#7a6a6a; --line:#eadcd9;
+  --brand:#c0392b; --brand-ink:#ffffff; --brand-soft:#fbe6e3;
+  --ok:#2e8b57; --ok-soft:#e3f4ea; --warn:#d98200; --warn-soft:#fff2db;
+  --left:#2c6fbb; --right:#8a4fb8;
+  --danger:#b3261e; --danger-line:#e8b8b4;
+  --radius:18px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#171212; --card:#241c1c; --ink:#f5eceb; --muted:#b4a3a1; --line:#3a2d2d;
+    --brand:#e5594a; --brand-soft:#3a1f1c; --ok:#4cc380; --ok-soft:#163223;
+    --warn:#f0a63a; --warn-soft:#3a2a10; --left:#6fa8ee; --right:#c39af0;
+    --danger:#ff8a80; --danger-line:#7a3a36;
+  }
+}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#171212; --card:#241c1c; --ink:#f5eceb; --muted:#b4a3a1; --line:#3a2d2d;
+  --brand:#e5594a; --brand-soft:#3a1f1c; --ok:#4cc380; --ok-soft:#163223;
+  --warn:#f0a63a; --warn-soft:#3a2a10; --left:#6fa8ee; --right:#c39af0;
+  --danger:#ff8a80; --danger-line:#7a3a36;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font:17px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+button{font:inherit;color:inherit;touch-action:manipulation}
+header.app{
+  position:sticky;top:0;z-index:5;background:var(--brand);color:var(--brand-ink);
+  padding:calc(12px + env(safe-area-inset-top)) 16px 12px;
+  display:flex;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+header.app h1{margin:0;font-size:19px;font-weight:700;flex:1}
+header.app .pill{background:rgba(255,255,255,.2);padding:4px 12px;border-radius:99px;font-size:14px;font-weight:600}
+main{max-width:640px;margin:0 auto;padding:14px 14px 0}
+.hidden{display:none!important}
+
+/* navegação inferior */
+nav.tabs{
+  position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--brand);color:var(--brand-ink);
+  box-shadow:0 -2px 10px rgba(0,0,0,.15);display:flex;
+  padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{
+  flex:1;border:0;background:none;padding:8px 4px 9px;display:flex;flex-direction:column;
+  align-items:center;gap:2px;font-size:13px;color:rgba(255,255,255,.88);font-weight:600;cursor:pointer}
+nav.tabs button .ic{font-size:22px;line-height:1;padding:3px 18px;border-radius:99px}
+nav.tabs button[aria-current="page"]{color:#fff}
+nav.tabs button[aria-current="page"] .ic{background:rgba(255,255,255,.3)}
+
+/* navegação de dias */
+.daynav{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.daynav .mid{flex:1;text-align:center}
+.daynav .mid b{display:block;font-size:21px}
+.daynav .mid span{color:var(--muted);font-size:15px;text-transform:capitalize}
+.round{
+  width:56px;height:56px;border-radius:50%;border:0;background:var(--brand);color:var(--brand-ink);
+  font-size:34px;font-weight:700;line-height:1;padding:0 0 4px;cursor:pointer;display:grid;place-items:center;
+  box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.round:active{transform:scale(.94)}
+.round:disabled{background:var(--line);color:var(--muted);box-shadow:none;opacity:.7}
+.jump{display:flex;gap:8px;margin:-2px 0 12px;justify-content:center}
+.chip{
+  border:1px solid var(--line);background:var(--card);border-radius:99px;padding:6px 14px;
+  font-size:14px;font-weight:600;cursor:pointer;color:var(--muted)}
+
+/* cartão de período */
+.card{
+  background:var(--card);border:2px solid var(--line);border-radius:var(--radius);
+  padding:14px;margin-bottom:14px}
+.card.done{border-color:var(--ok)}
+.card.half{border-color:var(--warn)}
+.card .head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.card .head h3{margin:0;font-size:19px;flex:1}
+.card .status{font-size:13px;font-weight:700;padding:3px 10px;border-radius:99px;
+  background:var(--brand-soft);color:var(--brand)}
+.card.done .status{background:var(--ok-soft);color:var(--ok)}
+.card.half .status{background:var(--warn-soft);color:var(--warn)}
+.time{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted)}
+.time input{
+  font:inherit;border:1px solid var(--line);border-radius:10px;padding:5px 8px;
+  background:var(--bg);color:var(--ink);width:100px}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;align-items:start}
+.cell{min-width:0}
+.grid .colh{
+  text-align:center;font-weight:700;font-size:14px;padding:6px 4px;border-radius:10px;color:#fff}
+.grid .colh.L{background:var(--left)}
+.grid .colh.R{background:var(--right)}
+.caps,.pair{display:grid;grid-template-columns:1fr 16px 1fr;align-items:center}
+.caps{font-size:13px;font-weight:700;text-align:center;line-height:1.1;margin:4px 0 3px}
+.caps small,.cap1 small{display:block;font-size:10px;font-weight:400;color:var(--muted)}
+.cap1{font-size:13px;font-weight:700;text-align:center;margin:6px 0 3px;line-height:1.1}
+.pair .sl{font-size:26px;text-align:center;color:var(--muted);line-height:1}
+.num{
+  width:100%;min-width:0;padding:0;height:58px;text-align:center;font-size:25px;font-weight:700;
+  border:2px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);
+  outline:none;font-variant-numeric:tabular-nums}
+.num:focus{border-color:var(--brand);background:var(--card)}
+.num::placeholder{color:var(--line);font-weight:400}
+
+/* resumo */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.panel h2{margin:0 0 10px;font-size:18px}
+.panel p{margin:6px 0;color:var(--muted);font-size:15px}
+.bar{height:12px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .3s}
+.days{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.dbtn{
+  position:relative;border:2px solid var(--line);background:var(--card);border-radius:14px;
+  padding:8px 2px 7px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.dbtn b{font-size:18px}
+.dbtn small{font-size:11px;color:var(--muted);height:13px}
+.dbtn .dots{display:flex;gap:3px}
+.dbtn .dots i{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.dbtn .dots i.on{background:var(--ok)}
+.dbtn .dots i.half{background:var(--warn)}
+.dbtn.today{border-color:var(--brand)}
+.dbtn.sel{background:var(--brand-soft)}
+table.avg{width:100%;border-collapse:collapse;font-size:15px}
+table.avg th,table.avg td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line)}
+table.avg th:first-child,table.avg td:first-child{text-align:left}
+table.avg thead th{font-size:13px;color:var(--muted)}
+.dotL{color:var(--left)} .dotR{color:var(--right)}
+
+.field{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.field input[type=date]{
+  font:inherit;border:2px solid var(--line);border-radius:12px;padding:10px 12px;
+  background:var(--bg);color:var(--ink);flex:1;min-width:160px}
+.btn{
+  display:block;width:100%;border:0;border-radius:14px;padding:14px 16px;font-weight:700;
+  background:var(--brand);color:var(--brand-ink);cursor:pointer;margin-top:10px;font-size:16px}
+.btn.ghost{background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.btn.danger{background:var(--card);color:var(--danger);border:2px solid var(--danger-line)}
+.btn.small{display:inline-block;width:auto;margin:0;padding:11px 16px}
+.note{font-size:13px;color:var(--muted);margin:14px 4px 0;text-align:center}
+
+.welcome{
+  position:fixed;inset:0;z-index:20;background:var(--brand);color:var(--brand-ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;padding:24px;text-align:center}
+.welcome .logo{font-size:64px;line-height:1}
+.welcome h2{margin:0;font-size:26px}
+.welcome p{margin:0 0 6px;opacity:.9}
+.welcome input{
+  width:100%;max-width:340px;font:inherit;font-size:20px;text-align:center;padding:14px;
+  border:0;border-radius:14px;background:#fff;color:#2a1f1f;outline:none}
+.welcome .btn{max-width:340px;background:#fff;color:var(--brand)}
+.hello{font-size:19px;font-weight:700;margin:0 4px 12px;text-align:center}
+.clear{
+  display:block;margin:12px 0 0 auto;border:1px solid var(--line);background:transparent;color:var(--muted);
+  border-radius:99px;padding:7px 14px;font-weight:600;font-size:13px;cursor:pointer}
+.clear:active{background:var(--bg)}
+.seg{display:flex;gap:6px}
+.seg button{
+  flex:1;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;
+  padding:11px 6px;font-weight:600;font-size:15px;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
+.remrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0;font-weight:600}
+.remrow input{
+  font:inherit;border:2px solid var(--line);border-radius:10px;padding:6px 10px;
+  background:var(--bg);color:var(--ink);width:120px}
+.txt{
+  font:inherit;border:2px solid var(--line);border-radius:12px;padding:10px 12px;
+  background:var(--bg);color:var(--ink);width:100%}
+
+.installbar{
+  position:fixed;left:12px;right:12px;bottom:calc(68px + env(safe-area-inset-bottom));z-index:7;
+  max-width:616px;margin:0 auto;background:var(--card);border:2px solid var(--brand);
+  border-radius:var(--radius);padding:14px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.installbar b{display:block;font-size:17px;margin-bottom:2px}
+.installbar p{margin:0 0 10px;color:var(--muted);font-size:14px}
+.installbar .row{display:flex;gap:8px}
+.installbar .btn{margin:0;flex:1;padding:12px}
+
+/* folha de impressão */
+#printArea{display:none}
+@media print{
+  @page{size:A4 landscape;margin:8mm}
+  html,body{background:#fff;color:#000;font:10pt/1.2 Arial,Helvetica,sans-serif;padding:0}
+  header.app,main,nav.tabs,.welcome,.installbar{display:none!important}
+  #printArea{display:block}
+  .sheet{page-break-after:always}
+  .sheet:last-child{page-break-after:auto}
+  .sheet h1{font-size:15pt;margin:0 0 2mm}
+  .sheet .meta{display:flex;justify-content:space-between;font-size:10pt;margin-bottom:2mm}
+  .sheet .meta span{flex:1}
+  .sheet .legend{font-size:8.5pt;margin:0 0 2mm;color:#333}
+  .sheet table{width:100%;border-collapse:collapse;table-layout:fixed}
+  .sheet th,.sheet td{border:.4mm solid #333;text-align:center;padding:0}
+  .sheet th{background:#eee;font-size:8.5pt;height:5.5mm}
+  .sheet th.per{background:#ddd;font-size:9.5pt}
+  .sheet td{height:9.5mm;font-size:11pt;font-weight:700}
+  .sheet td.d{font-size:9pt;font-weight:400;background:#f6f6f6}
+  .sheet td.n{font-weight:700;font-size:10pt;background:#f6f6f6}
+  .sheet .gap{border-left:.9mm solid #000}
+  .sheet .foot{margin-top:2mm;font-size:10pt}
+}
+</style>
+</head>
+<body>
+
+<header class="app">
+  <h1 id="title">Pressão Arterial</h1>
+  <span class="pill" id="pillTotal">0%</span>
+</header>
+
+<main>
+  <!-- DIA -->
+  <section id="v-day"></section>
+  <!-- RESUMO -->
+  <section id="v-sum" class="hidden"></section>
+  <!-- MAIS -->
+  <section id="v-more" class="hidden"></section>
+</main>
+
+<div id="printArea" aria-hidden="true"></div>
+
+<div class="installbar hidden" id="installBar" role="dialog" aria-label="Instalar o app">
+  <b>📲 Instalar o app</b>
+  <p id="installText">Tenha o app na tela inicial do celular, abrindo rápido e funcionando sem internet.</p>
+  <div class="row">
+    <button class="btn" id="barInstall">Instalar</button>
+    <button class="btn ghost" id="barClose">Agora não</button>
+  </div>
+</div>
+
+<form class="welcome hidden" id="welcome" autocomplete="off">
+  <div class="logo">❤️</div>
+  <h2>Pressão Arterial</h2>
+  <p>Para começar, qual é o seu nome?</p>
+  <input type="text" id="nameInput" maxlength="60" placeholder="Digite seu nome" aria-label="Seu nome" autocapitalize="words" enterkeyhint="done">
+  <button class="btn" type="submit">Entrar</button>
+</form>
+
+<nav class="tabs" aria-label="Navegação">
+  <button data-tab="day"  aria-current="page"><span class="ic">✍️</span>Anotar</button>
+  <button data-tab="sum"><span class="ic">📅</span>30 dias</button>
+  <button data-tab="more"><span class="ic">⚙️</span>Mais</button>
+</nav>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- constantes ---------- */
+var DAYS = 30;
+var KEY  = 'pressao.v1';
+var PERIODS = [
+  {id:'m', label:'Manhã', icon:'🌅'},
+  {id:'t', label:'Tarde', icon:'☀️'},
+  {id:'n', label:'Noite', icon:'🌙'}
+];
+var ARMS = [
+  {id:'L', label:'Esquerdo'},
+  {id:'R', label:'Direito'}
+];
+var FIELDS = [
+  {id:'s', label:'Alta',   hint:'sistólica'},
+  {id:'d', label:'Baixa',  hint:'diastólica'},
+  {id:'p', label:'Pulso',  hint:'bpm'}
+];
+
+/* ---------- tema ---------- */
+var THEME_KEY = 'pressao.theme';
+var THEMES = [
+  {id:'auto',  label:'Automático'},
+  {id:'light', label:'Claro'},
+  {id:'dark',  label:'Escuro'}
+];
+function getTheme(){
+  try{ var t = localStorage.getItem(THEME_KEY); if(t === 'light' || t === 'dark') return t; }catch(e){}
+  return 'auto';
+}
+function applyTheme(t){
+  var root = document.documentElement;
+  if(t === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', t);
+  try{ if(t === 'auto') localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, t); }catch(e){}
+  // cor da barra do navegador no celular
+  var dark = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  Array.prototype.forEach.call(document.querySelectorAll('meta[name="theme-color"]'), function(m){
+    m.setAttribute('content', dark ? '#7a2018' : '#c0392b');
+    if(t !== 'auto') m.removeAttribute('media');
+  });
+}
+
+/* ---------- lembretes (push) ---------- */
+var REM_KEY = 'pressao.reminders';
+var API = '/.netlify/functions/push';
+var REM_TIMES = {m:'11:50', t:'18:30', n:'22:50'};
+function loadRem(){
+  try{
+    var o = JSON.parse(localStorage.getItem(REM_KEY));
+    if(o && o.times) return { on:!!o.on, times:{ m:o.times.m||REM_TIMES.m, t:o.times.t||REM_TIMES.t, n:o.times.n||REM_TIMES.n } };
+  }catch(e){}
+  return { on:false, times:{ m:REM_TIMES.m, t:REM_TIMES.t, n:REM_TIMES.n } };
+}
+var rem = loadRem();
+function saveRem(){ try{ localStorage.setItem(REM_KEY, JSON.stringify(rem)); }catch(e){} }
+function remSupported(){
+  return location.protocol !== 'file:' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+function api(body){
+  return fetch(API, {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(body)}).then(function(r){
+    if(!r.ok){ var err = new Error('http ' + r.status); err.status = r.status; throw err; }
+    return r.json();
+  });
+}
+function keyBytes(s){
+  var b = atob((s + '='.repeat((4 - s.length % 4) % 4)).replace(/-/g,'+').replace(/_/g,'/'));
+  var u = new Uint8Array(b.length);
+  for(var i=0;i<b.length;i++) u[i] = b.charCodeAt(i);
+  return u;
+}
+function remMsg(t){ var el = document.getElementById('remMsg'); if(el) el.textContent = t || ''; }
+function getSub(){ return navigator.serviceWorker.ready.then(function(reg){ return reg.pushManager.getSubscription(); }); }
+function sendSubscription(sub){
+  return api({ action:'subscribe', endpoint:sub.endpoint, subscription:sub.toJSON(), times:rem.times,
+    tz:Intl.DateTimeFormat().resolvedOptions().timeZone });
+}
+// só diz ao servidor se já há alguma anotação hoje em cada período (sem valores)
+function pushStatus(){
+  if(!rem.on || !remSupported() || Notification.permission !== 'granted') return;
+  getSub().then(function(sub){
+    if(!sub) return;
+    var ti = todayIndex(), ok = st.start && ti !== null && ti >= 0 && ti < DAYS;
+    var body = { action:'status', endpoint:sub.endpoint, start:st.start, date:isoToday() };
+    PERIODS.forEach(function(P){ body[P.id] = ok && periodHasData(ti,P.id) ? 1 : 0; });
+    return api(body).catch(function(e){
+      if(e.status === 404) return sendSubscription(sub).then(function(){ return api(body); });
+      throw e;
+    });
+  }).catch(function(){});
+}
+var statusTimer = null;
+function queueStatus(){ clearTimeout(statusTimer); statusTimer = setTimeout(pushStatus, 1500); }
+
+function enableRem(){
+  if(!remSupported()){ remMsg('Este navegador não suporta lembretes.'); return; }
+  if(isIos() && !isStandalone()){ remMsg('No iPhone, instale o app na tela inicial e abra por lá para ativar os lembretes.'); return; }
+  remMsg('Ativando...');
+  Notification.requestPermission().then(function(perm){
+    if(perm !== 'granted') throw new Error('perm');
+    return fetch(API).then(function(r){ if(!r.ok) throw new Error('cfg'); return r.json(); });
+  }).then(function(cfg){
+    return navigator.serviceWorker.ready.then(function(reg){
+      return reg.pushManager.getSubscription().then(function(s){
+        return s || reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:keyBytes(cfg.key) });
+      });
+    });
+  }).then(function(sub){
+    return sendSubscription(sub);
+  }).then(function(){
+    rem.on = true; saveRem(); pushStatus(); renderMore();
+    remMsg('Lembretes ativados. Toque em "Enviar teste" para conferir.');
+  }).catch(function(e){
+    remMsg(e && e.message === 'perm'
+      ? 'Permissão negada. Libere as notificações deste site nas configurações do navegador.'
+      : 'Não foi possível ativar agora. Tente novamente em instantes.');
+  });
+}
+function disableRem(){
+  getSub().then(function(sub){
+    if(!sub) return;
+    return api({ action:'unsubscribe', endpoint:sub.endpoint }).catch(function(){}).then(function(){ return sub.unsubscribe(); });
+  }).catch(function(){}).then(function(){
+    rem.on = false; saveRem(); renderMore(); remMsg('Lembretes desativados.');
+  });
+}
+function testRem(){
+  remMsg('Enviando...');
+  getSub().then(function(sub){
+    if(!sub) throw new Error('nosub');
+    return api({ action:'test', endpoint:sub.endpoint });
+  }).then(function(){ remMsg('Teste enviado. A notificação deve chegar em instantes.'); })
+  .catch(function(){ remMsg('Não consegui enviar o teste. Desative e ative os lembretes de novo.'); });
+}
+
+/* ---------- estado ---------- */
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(raw){
+      var o = JSON.parse(raw);
+      if(o && typeof o === 'object') return { start:o.start||'', data:o.data||{}, name:o.name||'' };
+    }
+  }catch(e){}
+  return { start:'', data:{}, name:'' };
+}
+var st = load();
+var memoryOnly = false;
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(st)); }
+  catch(e){ memoryOnly = true; }
+}
+function get(i,p,a,f){
+  var d = st.data[i]; if(!d) return '';
+  var pp = d[p]; if(!pp) return '';
+  if(a === 't') return pp.t || '';
+  var aa = pp[a]; if(!aa) return '';
+  return aa[f] || '';
+}
+function put(i,p,a,f,v){
+  if(!st.data[i]) st.data[i] = {};
+  if(!st.data[i][p]) st.data[i][p] = {};
+  if(a === 't'){ st.data[i][p].t = v; return; }
+  if(!st.data[i][p][a]) st.data[i][p][a] = {};
+  st.data[i][p][a][f] = v;
+}
+
+/* ---------- datas ---------- */
+function parseStart(){
+  if(!st.start) return null;
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(st.start);
+  if(!m) return null;
+  return new Date(+m[1], +m[2]-1, +m[3]);
+}
+function dateOf(i){
+  var s = parseStart(); if(!s) return null;
+  return new Date(s.getFullYear(), s.getMonth(), s.getDate()+i);
+}
+function fmtLong(dt){
+  return dt.toLocaleDateString('pt-BR',{weekday:'long', day:'numeric', month:'long'});
+}
+function fmtShort(dt){
+  return dt.toLocaleDateString('pt-BR',{day:'2-digit', month:'2-digit'});
+}
+function fmtFull(dt){
+  return dt.toLocaleDateString('pt-BR',{day:'2-digit', month:'2-digit', year:'numeric'});
+}
+function todayIndex(){
+  var s = parseStart(); if(!s) return null;
+  var n = new Date();
+  var t0 = Date.UTC(s.getFullYear(), s.getMonth(), s.getDate());
+  var t1 = Date.UTC(n.getFullYear(), n.getMonth(), n.getDate());
+  return Math.round((t1 - t0) / 864e5);
+}
+function isoToday(){
+  var n = new Date();
+  return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
+}
+
+/* ---------- regras ---------- */
+function num(v){ return v === '' || v == null ? NaN : Number(v); }
+function armDone(i,p,a){
+  return get(i,p,a,'s') !== '' && get(i,p,a,'d') !== '';
+}
+function periodHasData(i,p){
+  var d = st.data[i] && st.data[i][p]; if(!d) return false;
+  if(d.t) return true;
+  return ARMS.some(function(A){ var a = d[A.id]; return a && (a.s || a.d || a.p); });
+}
+function periodDone(i,p){ return (armDone(i,p,'L')?1:0) + (armDone(i,p,'R')?1:0); }
+function dayDone(i){
+  var n = 0; PERIODS.forEach(function(P){ n += periodDone(i,P.id); }); return n; // 0..6
+}
+function totalDone(){
+  var n = 0; for(var i=0;i<DAYS;i++) n += dayDone(i); return n; // 0..180
+}
+// "13" e "130" valem o mesmo (13/8 = 130/80)
+function norm(v){
+  var n = num(v); if(isNaN(n)) return NaN;
+  return n <= 30 ? n*10 : n;
+}
+function fmtAvg(n){ return n === null ? '–' : (Math.round(n)/10).toFixed(1).replace('.',','); }
+function averages(){
+  var out = {};
+  ARMS.forEach(function(A){
+    var ss=0, dd=0, pp=0, pc=0, sets=0;
+    for(var i=0;i<DAYS;i++) PERIODS.forEach(function(P){
+      if(armDone(i,P.id,A.id)){
+        sets++; ss += norm(get(i,P.id,A.id,'s')); dd += norm(get(i,P.id,A.id,'d'));
+      }
+      var pv = num(get(i,P.id,A.id,'p'));
+      if(!isNaN(pv)){ pp += pv; pc++; }
+    });
+    out[A.id] = { sets:sets, s: sets ? ss/sets : null, d: sets ? dd/sets : null, p: pc ? Math.round(pp/pc) : null };
+  });
+  return out;
+}
+function armDiff(){
+  var diffs = [];
+  for(var i=0;i<DAYS;i++) PERIODS.forEach(function(P){
+    if(armDone(i,P.id,'L') && armDone(i,P.id,'R')){
+      diffs.push(Math.abs(norm(get(i,P.id,'L','s')) - norm(get(i,P.id,'R','s'))));
+    }
+  });
+  if(!diffs.length) return null;
+  return { avg: diffs.reduce(function(a,b){return a+b;},0) / diffs.length, n: diffs.length };
+}
+function cleanName(v){ return String(v||'').replace(/\s+/g,' ').trim().slice(0,60); }
+function firstName(n){ return n.split(' ')[0]; }
+function esc(s){
+  return String(s).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+  });
+}
+
+/* ---------- navegação ---------- */
+var tab = 'day';
+var cur = (function(){
+  var t = todayIndex();
+  if(t === null) return 0;
+  return Math.max(0, Math.min(DAYS-1, t));
+})();
+
+function setTab(t){
+  tab = t;
+  ['day','sum','more'].forEach(function(k){
+    document.getElementById('v-'+k).classList.toggle('hidden', k !== t);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('nav.tabs button'), function(b){
+    if(b.getAttribute('data-tab') === t) b.setAttribute('aria-current','page');
+    else b.removeAttribute('aria-current');
+  });
+  render();
+  window.scrollTo(0,0);
+}
+
+/* ---------- renderização ---------- */
+function headerUpdate(){
+  var pct = Math.round(totalDone() / (DAYS*6) * 100);
+  document.getElementById('pillTotal').textContent = pct + '%';
+  var t = document.getElementById('title');
+  t.textContent = tab === 'day' ? ('Dia ' + (cur+1) + ' de ' + DAYS) : 'Pressão Arterial';
+}
+
+function cardStatus(i,p){
+  var n = periodDone(i,p);
+  return { cls: n === 2 ? 'done' : (n === 1 ? 'half' : ''),
+           txt: n === 2 ? '✓ completo' : (n === 1 ? 'falta 1 braço' : 'a fazer') };
+}
+
+function numInput(P,A,f,label){
+  return '<input class="num" type="text" inputmode="decimal" autocomplete="off" placeholder="–"'
+       + ' aria-label="' + label + ', braço ' + A.label.toLowerCase() + ', ' + P.label.toLowerCase() + '"'
+       + ' data-p="' + P.id + '" data-a="' + A.id + '" data-f="' + f + '" value="' + esc(get(cur,P.id,A.id,f)) + '">';
+}
+
+function renderDay(){
+  var el = document.getElementById('v-day');
+  var dt = dateOf(cur);
+  var ti = todayIndex();
+  var h = '';
+  if(st.name) h += '<p class="hello">Olá, ' + esc(firstName(st.name)) + '! 👋</p>';
+  h += '<div class="daynav">'
+     + '<button class="round" id="prev" aria-label="Dia anterior"' + (cur===0?' disabled':'') + '>‹</button>'
+     + '<div class="mid"><b>Dia ' + (cur+1) + ' de ' + DAYS + '</b><span>' + (dt ? esc(fmtLong(dt)) : 'defina a data inicial em "30 dias"') + '</span></div>'
+     + '<button class="round" id="next" aria-label="Próximo dia"' + (cur===DAYS-1?' disabled':'') + '>›</button>'
+     + '</div>';
+  if(ti !== null && ti >= 0 && ti < DAYS && ti !== cur){
+    h += '<div class="jump"><button class="chip" id="gotoToday">Ir para hoje (dia ' + (ti+1) + ')</button></div>';
+  }
+  PERIODS.forEach(function(P){
+    var s = cardStatus(cur,P.id);
+    h += '<section class="card ' + s.cls + '" data-card="' + P.id + '">'
+       + '<div class="head"><h3>' + P.icon + ' ' + P.label + '</h3>'
+       + '<label class="time">Hora <input type="time" data-p="' + P.id + '" data-a="t" value="' + esc(get(cur,P.id,'t','')) + '"></label>'
+       + '<span class="status">' + s.txt + '</span></div>'
+       + '<div class="grid">'
+       + ARMS.map(function(A){ return '<div class="colh ' + A.id + '">Braço ' + A.label.toLowerCase() + '</div>'; }).join('');
+    ARMS.forEach(function(A){
+      h += '<div class="cell"><div class="caps"><span>Alta<small>sistólica</small></span><span></span><span>Baixa<small>diastólica</small></span></div>'
+         + '<div class="pair">' + numInput(P,A,'s','Alta') + '<span class="sl">/</span>' + numInput(P,A,'d','Baixa') + '</div></div>';
+    });
+    ARMS.forEach(function(A){
+      h += '<div class="cell"><div class="cap1">Pulso<small>opcional</small></div>' + numInput(P,A,'p','Pulso') + '</div>';
+    });
+    h += '</div>'
+       + (periodHasData(cur,P.id) ? '<button class="clear" data-clear="' + P.id + '">🗑️ Limpar registros da ' + P.label.toLowerCase() + '</button>' : '')
+       + '</section>';
+  });
+  h += '<p class="note">Digite como falamos: 13 e 8. Salva automaticamente neste aparelho.</p>';
+  el.innerHTML = h;
+  PERIODS.forEach(function(P){ refreshCard(P.id); });
+}
+
+function refreshCard(p){
+  var card = document.querySelector('[data-card="' + p + '"]'); if(!card) return;
+  var s = cardStatus(cur,p);
+  card.classList.remove('done','half');
+  if(s.cls) card.classList.add(s.cls);
+  card.querySelector('.status').textContent = s.txt;
+  var btn = card.querySelector('.clear'), has = periodHasData(cur,p);
+  if(has && !btn){
+    var P = PERIODS.filter(function(x){ return x.id === p; })[0];
+    btn = document.createElement('button');
+    btn.className = 'clear'; btn.setAttribute('data-clear', p);
+    btn.textContent = '🗑️ Limpar registros da ' + P.label.toLowerCase();
+    card.appendChild(btn);
+  } else if(!has && btn) btn.remove();
+}
+
+function renderSum(){
+  var el = document.getElementById('v-sum');
+  var ti = todayIndex();
+  var done = totalDone();
+  var h = '';
+
+  h += '<div class="panel"><h2>📆 Quando começa?</h2>'
+     + '<div class="field"><input type="date" id="startDate" value="' + esc(st.start) + '" aria-label="Data de início">'
+     + '<button class="btn small" id="startToday">Usar hoje</button></div>'
+     + '<p>' + (st.start
+        ? 'Termina em <b>' + esc(fmtFull(dateOf(DAYS-1))) + '</b>.'
+        : 'Escolha a data do primeiro dia. As outras 29 datas aparecem sozinhas.') + '</p></div>';
+
+  h += '<div class="panel"><h2>Progresso</h2>'
+     + '<div class="bar"><i style="width:' + Math.round(done/(DAYS*6)*100) + '%"></i></div>'
+     + '<p>' + done + ' de ' + (DAYS*6) + ' medições feitas (6 por dia: 3 horários × 2 braços)</p></div>';
+
+  h += '<div class="panel"><h2>Os 30 dias</h2><div class="days">';
+  for(var i=0;i<DAYS;i++){
+    var dt = dateOf(i);
+    var dots = PERIODS.map(function(P){
+      var n = periodDone(i,P.id);
+      return '<i class="' + (n===2?'on':(n===1?'half':'')) + '"></i>';
+    }).join('');
+    h += '<button class="dbtn' + (ti===i?' today':'') + (cur===i?' sel':'') + '" data-day="' + i + '" aria-label="Dia ' + (i+1) + '">'
+       + '<b>' + (i+1) + '</b><small>' + (dt ? fmtShort(dt) : '') + '</small><span class="dots">' + dots + '</span></button>';
+  }
+  h += '</div><p>Bolinhas: manhã · tarde · noite. Verde = os dois braços feitos; laranja = só um.</p></div>';
+
+  var av = averages(), df = armDiff();
+  h += '<div class="panel"><h2>Médias até agora</h2>'
+     + '<table class="avg"><thead><tr><th></th><th>Pressão</th><th>Pulso</th><th>Medições</th></tr></thead><tbody>';
+  ARMS.forEach(function(A){
+    var r = av[A.id];
+    h += '<tr><td class="dot' + A.id + '"><b>● ' + A.label + '</b></td>'
+       + '<td>' + (r.s===null ? '–' : fmtAvg(r.s) + ' / ' + fmtAvg(r.d)) + '</td><td>' + (r.p===null?'–':r.p) + '</td><td>' + r.sets + '</td></tr>';
+  });
+  h += '</tbody></table>';
+  if(df) h += '<p>Diferença média da alta entre os braços: <b>' + fmtAvg(df.avg) + '</b> (em ' + df.n + ' horários com os dois braços).</p>';
+  h += '<p>Leve esses números na consulta. Quem interpreta é o médico.</p></div>';
+
+  el.innerHTML = h;
+}
+
+var deferredInstall = null;
+var INSTALL_KEY = 'pressao.install';
+function isStandalone(){
+  return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+}
+function isIos(){ return /iPhone|iPad|iPod/i.test(navigator.userAgent); }
+function recentlyDismissed(){
+  try{ var t = +localStorage.getItem(INSTALL_KEY); return t && Date.now() - t < 7*864e5; }catch(e){ return false; }
+}
+// oferece a instalação: botão nativo no Android/Chrome, instruções no iPhone
+function offerInstall(){
+  var bar = document.getElementById('installBar');
+  var welcome = !document.getElementById('welcome').classList.contains('hidden');
+  var ios = !deferredInstall && isIos();
+  var show = !welcome && !isStandalone() && !recentlyDismissed() && (deferredInstall || ios);
+  bar.classList.toggle('hidden', !show);
+  if(!show) return;
+  document.getElementById('barInstall').classList.toggle('hidden', !deferredInstall);
+  document.getElementById('installText').textContent = ios
+    ? 'No Safari, toque em compartilhar e depois em "Adicionar à Tela de Início".'
+    : 'Tenha o app na tela inicial do celular, abrindo rápido e funcionando sem internet.';
+  document.getElementById('barClose').textContent = ios ? 'Entendi' : 'Agora não';
+}
+function dismissInstall(){
+  try{ localStorage.setItem(INSTALL_KEY, String(Date.now())); }catch(e){}
+  offerInstall();
+}
+function runInstall(){
+  if(!deferredInstall) return;
+  var ev = deferredInstall; deferredInstall = null;
+  ev.prompt();
+  if(ev.userChoice) ev.userChoice.then(function(c){ if(c.outcome !== 'accepted') dismissInstall(); });
+  offerInstall();
+  if(tab === 'more') renderMore();
+}
+function renderMore(){
+  var el = document.getElementById('v-more');
+  var h = '';
+  h += '<div class="panel"><h2>👤 Paciente</h2>'
+     + '<input class="txt" type="text" id="nameEdit" maxlength="60" value="' + esc(st.name) + '" aria-label="Nome do paciente">'
+     + '<p>Aparece nas boas-vindas, no PDF e na folha impressa.</p></div>';
+
+  var th = getTheme();
+  h += '<div class="panel"><h2>🎨 Tema</h2><div class="seg">'
+     + THEMES.map(function(T){ return '<button data-theme-set="' + T.id + '" aria-pressed="' + (T.id === th) + '">' + T.label + '</button>'; }).join('')
+     + '</div><p>Automático segue o tema do aparelho.</p></div>';
+
+  h += '<div class="panel"><h2>🔔 Lembretes</h2>'
+     + '<p>Se até o horário ainda não houver nenhuma anotação no período, o celular avisa.</p>';
+  PERIODS.forEach(function(P){
+    h += '<label class="remrow"><span>' + P.icon + ' ' + P.label + ' até</span>'
+       + '<input type="time" data-rem="' + P.id + '" value="' + esc(rem.times[P.id]) + '"></label>';
+  });
+  if(!remSupported()) h += '<p>Este navegador não suporta lembretes.</p>';
+  else if(!rem.on) h += '<button class="btn" id="remOn">Ativar lembretes</button>';
+  else h += '<button class="btn ghost" id="remTest">Enviar teste</button><button class="btn ghost" id="remOff">Desativar lembretes</button>';
+  h += '<p class="note" id="remMsg" role="status"></p></div>';
+
+  h += '<div class="panel"><h2>🖨️ Imprimir</h2>'
+     + '<p>Tabela dos 30 dias em A4 deitado (2 folhas). Use o modo paisagem.</p>'
+     + '<button class="btn" id="printBlank">Folha em branco, para escrever à mão</button>'
+     + '<button class="btn ghost" id="printFilled">Folha com os valores já anotados</button></div>';
+
+  h += '<div class="panel"><h2>📤 Exportar</h2>'
+     + '<p>Gera o arquivo com tudo o que foi anotado. Dá para mandar pelo WhatsApp ou e-mail.</p>'
+     + '<button class="btn" id="exportPdf">PDF com as medições</button>'
+     + '<button class="btn ghost" id="exportCsv">Planilha (CSV, abre no Excel)</button>'
+     + '<p class="note" id="exportMsg" role="status"></p></div>';
+
+  h += '<div class="panel"><h2>📲 Instalar no celular</h2>'
+     + '<p><b>Android (Chrome):</b> menu ⋮ → <i>Instalar app</i> ou <i>Adicionar à tela inicial</i>.<br>'
+     + '<b>iPhone (Safari):</b> botão compartilhar → <i>Adicionar à Tela de Início</i>.</p>'
+     + '<button class="btn ghost' + (deferredInstall ? '' : ' hidden') + '" id="installBtn">Instalar agora</button></div>';
+
+  h += '<div class="panel"><h2>🧹 Recomeçar</h2>'
+     + '<p>Apaga todas as medições e a data de início deste aparelho (o nome fica). Não dá para desfazer.</p>'
+     + '<button class="btn danger" id="wipe">Apagar tudo</button></div>';
+
+  if(memoryOnly) h += '<div class="panel"><p><b>Atenção:</b> o navegador não permitiu salvar. Os dados vão se perder ao fechar. Abra em uma aba normal (não anônima).</p></div>';
+
+  h += '<p class="note">Este app é só um caderno digital. Não faz diagnóstico nem substitui o médico.</p>';
+  el.innerHTML = h;
+}
+
+function render(){
+  headerUpdate();
+  if(tab === 'day') renderDay();
+  else if(tab === 'sum') renderSum();
+  else renderMore();
+}
+
+/* ---------- impressão ---------- */
+var printMode = 'blank';
+function buildPrint(){
+  var withVals = printMode === 'filled';
+  var s = parseStart();
+  function pr(i,p,a){
+    if(!withVals) return '';
+    var x = get(i,p,a,'s'), y = get(i,p,a,'d');
+    return (x || y) ? esc(x + '/' + y) : '';
+  }
+  var h = '';
+  [[0,15],[15,30]].forEach(function(r){
+    h += '<div class="sheet"><h1>Registro de pressão arterial — dias ' + (r[0]+1) + ' a ' + r[1] + '</h1>'
+       + '<div class="meta"><span>Nome: ' + (st.name ? '<b>' + esc(st.name) + '</b>' : '______________________________') + '</span>'
+       + '<span>Início: ' + (s ? esc(fmtFull(s)) : '____/____/________') + '</span>'
+       + '<span>Aparelho: ______________________</span></div>'
+       + '<p class="legend">Pressão: escreva alta/baixa, como 13/8 (alta = sistólica, baixa = diastólica). Hora: horário da medição. Pulso: batimentos por minuto (opcional). Medir 3 vezes ao dia — manhã, tarde e noite — nos dois braços, sentada e em repouso.</p>'
+       + '<table><colgroup><col style="width:8mm"><col style="width:14mm">';
+    for(var c=0;c<3;c++) h += '<col style="width:13mm"><col style="width:22mm"><col style="width:14mm"><col style="width:22mm"><col style="width:14mm">';
+    h += '</colgroup><thead><tr><th rowspan="3">Dia</th><th rowspan="3">Data</th>';
+    PERIODS.forEach(function(P,pi){ h += '<th class="per' + (pi?' gap':'') + '" colspan="5">' + P.label + '</th>'; });
+    h += '</tr><tr>';
+    PERIODS.forEach(function(P,pi){
+      h += '<th rowspan="2" class="' + (pi?'gap':'') + '">Hora</th>';
+      ARMS.forEach(function(A,ai){ h += '<th colspan="2">Braço ' + A.label.toLowerCase() + '</th>'; });
+    });
+    h += '</tr><tr>';
+    PERIODS.forEach(function(P,pi){
+      ARMS.forEach(function(A,ai){ h += '<th>Pressão</th><th>Pulso</th>'; });
+    });
+    h += '</tr></thead><tbody>';
+    for(var i=r[0]; i<r[1]; i++){
+      var dt = dateOf(i);
+      h += '<tr><td class="n">' + (i+1) + '</td><td class="d">' + (dt ? esc(fmtShort(dt)) : '&nbsp;') + '</td>';
+      PERIODS.forEach(function(P,pi){
+        h += '<td class="' + (pi?'gap':'') + '">' + (withVals ? esc(get(i,P.id,'t','')) : '') + '</td>';
+        ARMS.forEach(function(A,ai){
+          h += '<td>' + pr(i,P.id,A.id) + '</td><td>' + (withVals ? esc(get(i,P.id,A.id,'p')) : '') + '</td>';
+        });
+      });
+      h += '</tr>';
+    }
+    h += '</tbody></table>' + (st.name ? '<p class="foot">Nome do paciente: <b>' + esc(st.name) + '</b></p>' : '') + '</div>';
+  });
+  document.getElementById('printArea').innerHTML = h;
+}
+window.addEventListener('beforeprint', buildPrint);
+
+/* ---------- exportar ---------- */
+function listRows(){
+  var rows = [];
+  for(var i=0;i<DAYS;i++){
+    var dt = dateOf(i);
+    PERIODS.forEach(function(P){
+      ARMS.forEach(function(A){
+        var sv = get(i,P.id,A.id,'s'), dv = get(i,P.id,A.id,'d'), pv = get(i,P.id,A.id,'p');
+        if(sv === '' && dv === '' && pv === '') return;
+        rows.push({ dia:i+1, data: dt ? fmtFull(dt) : '', periodo:P.label, hora:get(i,P.id,'t',''), braco:A.label,
+          s:sv, d:dv, p:pv, smm: sv === '' ? '' : norm(sv), dmm: dv === '' ? '' : norm(dv) });
+      });
+    });
+  }
+  return rows;
+}
+function pressText(i,p,a){
+  var x = get(i,p,a,'s'), y = get(i,p,a,'d');
+  return (x || y) ? (x + '/' + y) : '';
+}
+
+/* CSV */
+function buildCsv(){
+  var rows = [['Dia','Data','Período','Hora','Braço','Alta','Baixa','Pulso','Alta (mmHg)','Baixa (mmHg)']];
+  listRows().forEach(function(r){ rows.push([r.dia,r.data,r.periodo,r.hora,r.braco,r.s,r.d,r.p,r.smm,r.dmm]); });
+  return '﻿' + rows.map(function(r){ return r.join(';'); }).join('\r\n');
+}
+
+/* PDF (A4 deitado, escrito à mão no formato PDF 1.4, fonte Helvetica) */
+function pdfStr(t){
+  t = String(t).replace(/[—–]/g,'-').replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
+  var o = '';
+  for(var i=0;i<t.length;i++){ o += t.charCodeAt(i) < 256 ? t.charAt(i) : '?'; }
+  return o;
+}
+function pdfEsc(t){ return pdfStr(t).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)'); }
+function pdfTw(t,size,bold){
+  var w = 0;
+  for(var i=0;i<t.length;i++){
+    var c = t.charAt(i);
+    if(/[0-9]/.test(c)) w += .556;
+    else if(' /,.-:()'.indexOf(c) > -1) w += .3;
+    else if(/[A-Z]/.test(c)) w += .68;
+    else if(/[mw]/.test(c)) w += .8;
+    else if(/[ilt]/.test(c)) w += .25;
+    else w += .54;
+  }
+  return w * size * (bold ? 1.06 : 1);
+}
+function buildPdf(){
+  var W = 842, H = 595, M = 28, RED = '0.75 0.22 0.17', GRAY = '0.35 0.35 0.35';
+  var start = parseStart(), pages = [];
+  function newPage(){
+    var ops = [];
+    var pg = {
+      ops: ops,
+      fill: function(x,t,w,h,g){ ops.push(g + ' g ' + x.toFixed(2) + ' ' + (H-t-h).toFixed(2) + ' ' + w.toFixed(2) + ' ' + h.toFixed(2) + ' re f 0 g'); },
+      box: function(x,t,w,h){ ops.push('0.5 w 0.25 G ' + x.toFixed(2) + ' ' + (H-t-h).toFixed(2) + ' ' + w.toFixed(2) + ' ' + h.toFixed(2) + ' re S'); },
+      text: function(x,t,str,size,bold,rgb){ ops.push('BT ' + (rgb || '0 0 0') + ' rg /' + (bold ? 'F2' : 'F1') + ' ' + size + ' Tf ' + x.toFixed(2) + ' ' + (H-t).toFixed(2) + ' Td (' + pdfEsc(str) + ') Tj ET'); },
+      cell: function(x,t,w,h,str,o){
+        o = o || {};
+        if(o.fill !== undefined) pg.fill(x,t,w,h,o.fill);
+        pg.box(x,t,w,h);
+        if(str !== '' && str !== undefined){
+          var size = o.size || 10;
+          pg.text(x + (w - pdfTw(str,size,o.bold))/2, t + h/2 + size*0.35, str, size, o.bold);
+        }
+      }
+    };
+    pages.push(pg);
+    if(st.name) pg.text(M, H-28, 'Nome do paciente: ' + st.name, 10, true);
+    pg.text(M, H-14, 'Gerado em ' + fmtFull(new Date()) + ' pelo app Pressão Arterial', 7, false, '0.5 0.5 0.5');
+    return pg;
+  }
+
+  // 2 páginas de tabela (15 dias cada)
+  [[0,15],[15,30]].forEach(function(r){
+    var pg = newPage();
+    pg.text(M, 40, 'Registro de pressão arterial', 16, true, RED);
+    pg.text(M, 56, 'Dias ' + (r[0]+1) + ' a ' + r[1] + (start ? '   ·   início em ' + fmtFull(start) : ''), 10, false);
+    pg.text(M, 70, 'Pressão: alta/baixa, como 13/8 (alta = sistólica, baixa = diastólica). Pulso em batimentos por minuto (opcional). Hora: horário em que a medição foi feita. 3 medições por dia, nos dois braços.', 8, false, GRAY);
+    var cw = [22,38], k;
+    for(k=0;k<3;k++) cw.push(34, 60, 38, 60, 38);
+    var x = [M]; cw.forEach(function(w){ x.push(x[x.length-1] + w); });
+    var T0 = 82, hh = 16, rh = 26, HF = '0.93';
+    pg.cell(x[0], T0, cw[0], hh*3, 'Dia', {fill:HF, bold:true, size:9});
+    pg.cell(x[1], T0, cw[1], hh*3, 'Data', {fill:HF, bold:true, size:9});
+    PERIODS.forEach(function(P,pi){
+      var c0 = 2 + pi*5;
+      pg.cell(x[c0], T0, x[c0+5]-x[c0], hh, P.label, {fill:'0.86', bold:true, size:10});
+      pg.cell(x[c0], T0+hh, cw[c0], hh*2, 'Hora', {fill:HF, bold:true, size:8});
+      ARMS.forEach(function(A,ai){
+        var c = c0 + 1 + ai*2;
+        pg.cell(x[c], T0+hh, x[c+2]-x[c], hh, 'Braço ' + A.label.toLowerCase(), {fill:HF, bold:true, size:9});
+        pg.cell(x[c], T0+hh*2, cw[c], hh, 'Pressão', {fill:HF, size:8});
+        pg.cell(x[c+1], T0+hh*2, cw[c+1], hh, 'Pulso', {fill:HF, size:8});
+      });
+    });
+    for(var i=r[0]; i<r[1]; i++){
+      var top = T0 + hh*3 + (i - r[0])*rh, dt = dateOf(i);
+      pg.cell(x[0], top, cw[0], rh, String(i+1), {fill:'0.96', bold:true, size:10});
+      pg.cell(x[1], top, cw[1], rh, dt ? fmtShort(dt) : '', {fill:'0.96', size:9});
+      PERIODS.forEach(function(P,pi){
+        var c0 = 2 + pi*5;
+        pg.cell(x[c0], top, cw[c0], rh, get(i,P.id,'t',''), {size:10});
+        ARMS.forEach(function(A,ai){
+        var c = c0 + 1 + ai*2;
+        pg.cell(x[c], top, cw[c], rh, pressText(i,P.id,A.id), {bold:true, size:12});
+        pg.cell(x[c+1], top, cw[c+1], rh, get(i,P.id,A.id,'p'), {size:12});
+      }); });
+    }
+  });
+
+  // página de resumo
+  var sp = newPage(), av = averages(), df = armDiff();
+  sp.text(M, 40, 'Resumo das medições', 16, true, RED);
+  sp.text(M, 56, 'Médias de todas as medições completas (alta e baixa preenchidas)', 10, false, GRAY);
+  var cws = [140,200,120,140], xs = [M];
+  cws.forEach(function(w){ xs.push(xs[xs.length-1] + w); });
+  ['Braço','Pressão média','Pulso médio','Medições'].forEach(function(t,ci){
+    sp.cell(xs[ci], 76, cws[ci], 24, t, {fill:'0.93', bold:true, size:10});
+  });
+  ARMS.forEach(function(A,ri){
+    var r = av[A.id], top = 100 + ri*28;
+    sp.cell(xs[0], top, cws[0], 28, 'Braço ' + A.label.toLowerCase(), {bold:true, size:11});
+    sp.cell(xs[1], top, cws[1], 28, r.s === null ? '-' : fmtAvg(r.s) + ' / ' + fmtAvg(r.d) + '  (' + Math.round(r.s) + '/' + Math.round(r.d) + ')', {size:11});
+    sp.cell(xs[2], top, cws[2], 28, r.p === null ? '-' : String(r.p), {size:11});
+    sp.cell(xs[3], top, cws[3], 28, String(r.sets), {size:11});
+  });
+  var ty = 176;
+  if(df){ sp.text(M, ty, 'Diferença média da alta entre os braços: ' + fmtAvg(df.avg) + '  (em ' + df.n + ' horários com os dois braços)', 11, false); ty += 20; }
+  sp.text(M, ty, 'Valores curtos valem dez vezes o número: 13/8 equivale a 130/80 mmHg.', 9, false, GRAY);
+  sp.text(M, ty+16, 'Este documento é só um registro. A interpretação dos valores é feita pelo médico.', 9, false, GRAY);
+
+  // monta o arquivo
+  var out = '%PDF-1.4\n%' + String.fromCharCode(0xE2,0xE3,0xCF,0xD3) + '\n', offs = [];
+  function obj(n, body){ offs[n] = out.length; out += n + ' 0 obj\n' + body + '\nendobj\n'; }
+  var kids = [];
+  pages.forEach(function(p,k){ kids.push((6 + k*2) + ' 0 R'); });
+  obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2, '<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + pages.length + ' >>');
+  obj(3, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  obj(4, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+  pages.forEach(function(p,k){
+    var stream = p.ops.join('\n');
+    obj(5 + k*2, '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream');
+    obj(6 + k*2, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + W + ' ' + H + '] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ' + (5 + k*2) + ' 0 R >>');
+  });
+  var total = 5 + pages.length*2, xref = out.length;
+  out += 'xref\n0 ' + total + '\n0000000000 65535 f \n';
+  for(var n=1;n<total;n++) out += ('0000000000' + offs[n]).slice(-10) + ' 00000 n \n';
+  out += 'trailer\n<< /Size ' + total + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF';
+  var u8 = new Uint8Array(out.length);
+  for(var q=0;q<out.length;q++) u8[q] = out.charCodeAt(q) & 255;
+  return new Blob([u8], {type:'application/pdf'});
+}
+
+/* entrega do arquivo: salva ou abre o compartilhamento do celular */
+async function deliver(blob, name){
+  try{
+    var file = new File([blob], name, {type:blob.type});
+    var mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    if(mobile && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:'Registro de pressão arterial'});
+      return;
+    }
+  }catch(e3){ if(e3 && e3.name === 'AbortError') return; }
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+function exportAs(kind){
+  var msg = document.getElementById('exportMsg');
+  if(msg) msg.textContent = '';
+  var blob, name;
+  try{
+    if(kind === 'csv'){ blob = new Blob([buildCsv()], {type:'text/csv;charset=utf-8'}); name = 'pressao-arterial.csv'; }
+    else { blob = buildPdf(); name = 'pressao-arterial.pdf'; }
+  }catch(e){ if(msg) msg.textContent = 'Não consegui gerar o arquivo neste aparelho.'; return; }
+  deliver(blob, name).catch(function(){ if(msg) msg.textContent = 'Não foi possível salvar o arquivo.'; });
+}
+
+/* ---------- eventos ---------- */
+document.addEventListener('input', function(e){
+  var t = e.target;
+  if(!t.matches || !t.matches('[data-p]')) return;
+  var p = t.getAttribute('data-p'), a = t.getAttribute('data-a'), f = t.getAttribute('data-f');
+  if(a === 't'){
+    put(cur,p,'t','',t.value); save(); refreshCard(p); headerUpdate(); return;
+  }
+  var raw = t.value;
+  var sep = /\D/.test(raw);                       // vírgula, ponto, barra ou espaço
+  var v = raw.replace(/\D/g,'').slice(0,3);
+  var insert = !e.inputType || e.inputType.indexOf('insert') === 0;
+  var pair = t.parentNode;
+  if(f === 'd'){
+    // formato do aparelho (128/82): se a "alta" já tinha 2 dígitos e o total passou de 4, reorganiza
+    var sv = get(cur,p,a,'s');
+    if(sv.length === 2 && +sv >= 10 && +sv <= 26 && (sv + v).length >= 5){
+      var all = sv + v;
+      put(cur,p,a,'s',all.slice(0,3));
+      v = all.slice(3);
+      var si = pair.querySelector('[data-f="s"]'); if(si) si.value = all.slice(0,3);
+    }
+  }
+  if(v !== raw) t.value = v;
+  put(cur,p,a,f,v);
+  save(); refreshCard(p); headerUpdate(); queueStatus();
+  if(f === 's' && v && insert){
+    var di = pair.querySelector('[data-f="d"]');
+    if(di && (sep || v.length === 3 || (v.length === 2 && !di.value))) di.focus();
+  }
+});
+
+// ao tocar num campo, seleciona o conteúdo para digitar por cima
+document.addEventListener('focusin', function(e){
+  var t = e.target;
+  if(t.classList && t.classList.contains('num')) setTimeout(function(){ try{ t.select(); }catch(x){} }, 0);
+});
+
+document.addEventListener('click', function(e){
+  var b = e.target.closest ? e.target.closest('button') : null;
+  if(!b) return;
+  if(b.hasAttribute('data-tab')){ setTab(b.getAttribute('data-tab')); return; }
+  if(b.hasAttribute('data-theme-set')){ applyTheme(b.getAttribute('data-theme-set')); renderMore(); return; }
+  if(b.hasAttribute('data-clear')){
+    var cp = b.getAttribute('data-clear');
+    var P0 = PERIODS.filter(function(x){ return x.id === cp; })[0];
+    if(P0 && confirm('Limpar os registros da ' + P0.label.toLowerCase() + ' do dia ' + (cur+1) + '? Isso não pode ser desfeito.')){
+      if(st.data[cur]) delete st.data[cur][cp];
+      save(); render(); queueStatus();
+    }
+    return;
+  }
+  if(b.hasAttribute('data-day')){ cur = +b.getAttribute('data-day'); setTab('day'); return; }
+  switch(b.id){
+    case 'prev': if(cur>0){ cur--; render(); window.scrollTo(0,0);} break;
+    case 'next': if(cur<DAYS-1){ cur++; render(); window.scrollTo(0,0);} break;
+    case 'gotoToday': var ti = todayIndex(); if(ti!==null){ cur = Math.max(0,Math.min(DAYS-1,ti)); render(); } break;
+    case 'startToday': st.start = isoToday(); save(); render(); queueStatus(); break;
+    case 'printBlank': printMode = 'blank'; buildPrint(); window.print(); break;
+    case 'printFilled': printMode = 'filled'; buildPrint(); window.print(); break;
+    case 'exportPdf': exportAs('pdf'); break;
+    case 'exportCsv': exportAs('csv'); break;
+    case 'installBtn':
+      runInstall();
+      break;
+    case 'barInstall': runInstall(); break;
+    case 'remOn': enableRem(); break;
+    case 'remOff': disableRem(); break;
+    case 'remTest': testRem(); break;
+    case 'barClose': dismissInstall(); break;
+    case 'wipe':
+      if(confirm('Apagar TODAS as medições e a data de início? Isso não pode ser desfeito.')){
+        st = { start:'', data:{}, name:st.name }; save(); cur = 0; render(); queueStatus();
+      }
+      break;
+  }
+});
+
+document.addEventListener('submit', function(e){
+  if(e.target.id !== 'welcome') return;
+  e.preventDefault();
+  var n = cleanName(document.getElementById('nameInput').value);
+  if(!n){ document.getElementById('nameInput').focus(); return; }
+  st.name = n; save();
+  document.getElementById('welcome').classList.add('hidden');
+  if(st.start) render(); else setTab('sum');
+  offerInstall();
+});
+
+document.addEventListener('change', function(e){
+  if(e.target && e.target.getAttribute && e.target.hasAttribute('data-rem')){
+    var rp = e.target.getAttribute('data-rem');
+    rem.times[rp] = e.target.value || REM_TIMES[rp];
+    e.target.value = rem.times[rp];
+    saveRem();
+    if(rem.on && remSupported()) getSub().then(function(sub){ if(sub) return sendSubscription(sub); }).catch(function(){});
+    return;
+  }
+  if(e.target && e.target.id === 'nameEdit'){
+    var n = cleanName(e.target.value);
+    if(n){ st.name = n; save(); }
+    e.target.value = st.name;
+    return;
+  }
+  if(e.target && e.target.id === 'startDate'){
+    st.start = e.target.value || '';
+    save(); queueStatus();
+    var ti = todayIndex();
+    if(ti !== null) cur = Math.max(0, Math.min(DAYS-1, ti));
+    render();
+  }
+});
+
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault(); deferredInstall = e;
+  if(tab === 'more') renderMore();
+  offerInstall();
+});
+window.addEventListener('appinstalled', function(){ deferredInstall = null; offerInstall(); if(tab === 'more') renderMore(); });
+
+/* ---------- inicialização ---------- */
+if(navigator.storage && navigator.storage.persist){ navigator.storage.persist().catch(function(){}); }
+if('serviceWorker' in navigator && location.protocol !== 'file:'){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+// primeira abertura sem data: leva ao resumo para escolher a data inicial
+if(!st.start) tab = 'sum';
+setTab(tab);
+if(!st.name){
+  document.getElementById('welcome').classList.remove('hidden');
+  document.getElementById('nameInput').focus();
+}
+offerInstall();
+pushStatus();
+document.addEventListener('visibilitychange', function(){ if(!document.hidden) pushStatus(); });
+})();
+</script>
+</body>
+</html>
