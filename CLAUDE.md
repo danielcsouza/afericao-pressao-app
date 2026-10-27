@@ -11,8 +11,8 @@ Porte do PWA "Pressão Arterial" (referência em `reference/index.html`, somente
 Duração 1–365 dias; até 3 períodos (manhã/tarde/noite), cada um opcional (mín. 1); braços: ambos/esquerdo/direito; pulso opcional; lembrete = uma notificação local no horário do período se ainda não há nenhuma anotação nele (sem repetição, sem servidor); sem importar dados do PWA; publicação na Play Store; visual o mais próximo possível do PWA; PDF/impressão/CSV mantidos e dinâmicos.
 
 ## Estado
-Feito: projeto criado, dependências, `lib/domain/` (models, rules, dates, input) com testes em `test/domain_test.dart` (18 passando); armazenamento (`lib/data/storage.dart`), providers Riverpod (`lib/app/providers.dart`), tema com tokens do PWA (`lib/ui/theme.dart`), `Shell` com cabeçalho + barra inferior e abas ainda vazias (`lib/ui/shell.dart`); `SetupGate` mostra um wizard provisório (só "Usar padrão"). 25 testes passando.
-Próximos passos (ordem do plano): wizard de primeiro acesso (substituir `_WizardPlaceholder` em `lib/ui/setup_gate.dart`) → abas Anotar / Resumo / Mais → PDF/CSV/impressão → notificações locais → ícone/splash/build `.aab` → ficha da Play Store.
+Feito: projeto criado, dependências, `lib/domain/` (models, rules, dates, input) com testes em `test/domain_test.dart` (18 passando); armazenamento (`lib/data/storage.dart`), providers Riverpod (`lib/app/providers.dart`), tema com tokens do PWA (`lib/ui/theme.dart`), `Shell` com cabeçalho + barra inferior e abas ainda vazias (`lib/ui/shell.dart`); `SetupGate` mostra o wizard de 7 passos (`lib/ui/wizard.dart`) até o caderno ser configurado; o pedido de permissão de notificação fica para a etapa de notificações. 27 testes passando; app roda no emulador (build exige core library desugaring, já configurado).
+Próximos passos (ordem do plano): abas Anotar / Resumo / Mais (a tela "Ajustar caderno" deve reaproveitar os passos do wizard) → PDF/CSV/impressão → notificações locais → ícone/splash/build `.aab` → ficha da Play Store.
 
 ## Comandos
 `flutter test` · `flutter analyze` · `flutter run`
