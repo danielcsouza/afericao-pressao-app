@@ -23,13 +23,17 @@ class Storage {
     }
   }
 
-  Future<void> saveNotebook(Notebook nb) => _prefs.setString(notebookKey, jsonEncode(nb.toJson()));
+  Future<void> saveNotebook(Notebook nb) =>
+      _prefs.setString(notebookKey, jsonEncode(nb.toJson()));
 
   Future<void> clearNotebook() => _prefs.remove(notebookKey);
 
   ThemeMode loadTheme() {
     final v = _prefs.getString(themeKey);
-    return ThemeMode.values.firstWhere((m) => m.name == v, orElse: () => ThemeMode.system);
+    return ThemeMode.values.firstWhere(
+      (m) => m.name == v,
+      orElse: () => ThemeMode.system,
+    );
   }
 
   Future<void> saveTheme(ThemeMode m) => _prefs.setString(themeKey, m.name);

@@ -13,10 +13,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR');
   final prefs = await SharedPreferences.getInstance();
-  runApp(ProviderScope(
-    overrides: [storageProvider.overrideWithValue(Storage(prefs))],
-    child: const DiarioApp(),
-  ));
+  runApp(
+    ProviderScope(
+      overrides: [storageProvider.overrideWithValue(Storage(prefs))],
+      child: const DiarioApp(),
+    ),
+  );
 }
 
 class DiarioApp extends ConsumerWidget {

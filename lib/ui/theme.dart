@@ -78,7 +78,8 @@ class AppColors extends ThemeExtension<AppColors> {
   AppColors copyWith() => this;
 
   @override
-  AppColors lerp(ThemeExtension<AppColors>? other, double t) => t < 0.5 ? this : (other as AppColors? ?? this);
+  AppColors lerp(ThemeExtension<AppColors>? other, double t) =>
+      t < 0.5 ? this : (other as AppColors? ?? this);
 }
 
 extension AppColorsContext on BuildContext {
@@ -89,13 +90,17 @@ const double cardRadius = 18;
 
 ThemeData buildTheme(Brightness brightness) {
   final c = brightness == Brightness.light ? AppColors.light : AppColors.dark;
-  final scheme = ColorScheme.fromSeed(seedColor: AppColors.light.brand, brightness: brightness).copyWith(
-    primary: c.brand,
-    onPrimary: AppColors.brandInk,
-    surface: c.card,
-    onSurface: c.ink,
-    error: c.danger,
-  );
+  final scheme =
+      ColorScheme.fromSeed(
+        seedColor: AppColors.light.brand,
+        brightness: brightness,
+      ).copyWith(
+        primary: c.brand,
+        onPrimary: AppColors.brandInk,
+        surface: c.card,
+        onSurface: c.ink,
+        error: c.danger,
+      );
   return ThemeData(
     useMaterial3: true,
     brightness: brightness,
@@ -103,7 +108,10 @@ ThemeData buildTheme(Brightness brightness) {
     scaffoldBackgroundColor: c.bg,
     canvasColor: c.bg,
     dividerColor: c.line,
-    textTheme: Typography.material2021().black.apply(bodyColor: c.ink, displayColor: c.ink),
+    textTheme: Typography.material2021().black.apply(
+      bodyColor: c.ink,
+      displayColor: c.ink,
+    ),
     extensions: [c],
   );
 }

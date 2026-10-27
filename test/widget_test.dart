@@ -12,10 +12,12 @@ Future<ProviderContainer> _pump(WidgetTester tester) async {
   final storage = Storage(await SharedPreferences.getInstance());
   await tester.binding.setSurfaceSize(const Size(400, 900));
   addTearDown(() => tester.binding.setSurfaceSize(null));
-  await tester.pumpWidget(ProviderScope(
-    overrides: [storageProvider.overrideWithValue(storage)],
-    child: const DiarioApp(),
-  ));
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [storageProvider.overrideWithValue(storage)],
+      child: const DiarioApp(),
+    ),
+  );
   return ProviderScope.containerOf(tester.element(find.byType(DiarioApp)));
 }
 
@@ -25,7 +27,7 @@ void main() {
     await tester.tap(find.text('Usar padrão'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Dia 1 de 30'), findsOneWidget);
+    expect(find.text('Dia 1 de 30'), findsWidgets); // cabeçalho e aba Anotar
     expect(find.text('0%'), findsOneWidget);
     expect(find.text('30 dias'), findsOneWidget);
 
@@ -73,7 +75,7 @@ void main() {
     expect(nb.config.pulse, false);
     expect(nb.config.periods, [Period.m, Period.n]);
     expect(nb.config.remindersOn, false);
-    expect(find.text('Dia 1 de 7'), findsOneWidget);
+    expect(find.text('Dia 1 de 7'), findsWidgets);
   });
 
   testWidgets('não deixa avançar sem nenhum período', (tester) async {
@@ -86,7 +88,9 @@ void main() {
       await tester.tap(find.text('${p.icon} ${p.label}'));
     }
     await tester.pump();
-    final btn = tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Avançar'));
+    final btn = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Avançar'),
+    );
     expect(btn.onPressed, isNull);
   });
 }

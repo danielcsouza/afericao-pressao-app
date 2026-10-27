@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/providers.dart';
+import 'anotar_tab.dart';
 import 'theme.dart';
 
 /// Cabeçalho fixo, conteúdo da aba e barra inferior (Adendo B do plano).
@@ -39,7 +40,7 @@ class Shell extends ConsumerWidget {
                   child: IndexedStack(
                     index: tab,
                     children: const [
-                      _TabPlaceholder('Anotar'),
+                      AnotarTab(),
                       _TabPlaceholder('Resumo'),
                       _TabPlaceholder('Mais'),
                     ],
@@ -47,7 +48,10 @@ class Shell extends ConsumerWidget {
                 ),
               ),
             ),
-            _BottomBar(index: tab, middleLabel: '$days ${days == 1 ? 'dia' : 'dias'}'),
+            _BottomBar(
+              index: tab,
+              middleLabel: '$days ${days == 1 ? 'dia' : 'dias'}',
+            ),
           ],
         ),
       ),
@@ -78,18 +82,29 @@ class _Header extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: AppColors.brandInk, fontSize: 19, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    color: AppColors.brandInk,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: .2),
                   borderRadius: BorderRadius.circular(99),
                 ),
                 child: Text(
                   '$percent%',
-                  style: const TextStyle(color: AppColors.brandInk, fontSize: 14, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    color: AppColors.brandInk,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -108,11 +123,7 @@ class _BottomBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    final items = [
-      ('✍️', 'Anotar'),
-      ('📅', middleLabel),
-      ('⚙️', 'Mais'),
-    ];
+    final items = [('✍️', 'Anotar'), ('📅', middleLabel), ('⚙️', 'Mais')];
     return Material(
       color: c.headerColor,
       elevation: 8,
@@ -131,12 +142,20 @@ class _BottomBar extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
-                            color: i == index ? Colors.white.withValues(alpha: .3) : Colors.transparent,
+                            color: i == index
+                                ? Colors.white.withValues(alpha: .3)
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(99),
                           ),
-                          child: Text(items[i].$1, style: const TextStyle(fontSize: 22, height: 1.2)),
+                          child: Text(
+                            items[i].$1,
+                            style: const TextStyle(fontSize: 22, height: 1.2),
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -144,7 +163,9 @@ class _BottomBar extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white.withValues(alpha: i == index ? 1 : .88),
+                            color: Colors.white.withValues(
+                              alpha: i == index ? 1 : .88,
+                            ),
                           ),
                         ),
                       ],
@@ -164,6 +185,10 @@ class _TabPlaceholder extends StatelessWidget {
   final String name;
 
   @override
-  Widget build(BuildContext context) =>
-      Center(child: Text(name, style: TextStyle(color: context.colors.muted, fontSize: 17)));
+  Widget build(BuildContext context) => Center(
+    child: Text(
+      name,
+      style: TextStyle(color: context.colors.muted, fontSize: 17),
+    ),
+  );
 }

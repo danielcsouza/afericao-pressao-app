@@ -18,19 +18,23 @@ class NotebookNotifier extends Notifier<Notebook> {
     ref.read(storageProvider).saveNotebook(nb);
   }
 
-  void setName(String name) => _set(state.copyWith(name: name.trim().replaceAll(RegExp(r'\s+'), ' ')));
+  void setName(String name) =>
+      _set(state.copyWith(name: name.trim().replaceAll(RegExp(r'\s+'), ' ')));
 
   void setStart(String iso) => _set(state.copyWith(start: iso));
 
   void setConfig(Config c) => _set(state.copyWith(config: c));
 
   /// Conclui o wizard (ou "Usar padrão"): grava a data de início se ainda não houver.
-  void finishSetup({String? name, String? start, Config? config}) => _set(state.copyWith(
-        name: name,
-        start: start ?? (state.start.isEmpty ? isoOf(DateTime.now()) : state.start),
-        config: config,
-        configured: true,
-      ));
+  void finishSetup({String? name, String? start, Config? config}) => _set(
+    state.copyWith(
+      name: name,
+      start:
+          start ?? (state.start.isEmpty ? isoOf(DateTime.now()) : state.start),
+      config: config,
+      configured: true,
+    ),
+  );
 
   void setEntry(int day, Period p, Entry e) => _set(state.withEntry(day, p, e));
 
@@ -49,9 +53,13 @@ class NotebookNotifier extends Notifier<Notebook> {
   void eraseAll() => _set(state.copyWith(data: const {}));
 }
 
-final notebookProvider = NotifierProvider<NotebookNotifier, Notebook>(NotebookNotifier.new);
+final notebookProvider = NotifierProvider<NotebookNotifier, Notebook>(
+  NotebookNotifier.new,
+);
 
-final rulesProvider = Provider<Rules>((ref) => Rules(ref.watch(notebookProvider)));
+final rulesProvider = Provider<Rules>(
+  (ref) => Rules(ref.watch(notebookProvider)),
+);
 
 class ThemeModeNotifier extends Notifier<ThemeMode> {
   @override
@@ -63,7 +71,9 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   }
 }
 
-final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
+  ThemeModeNotifier.new,
+);
 
 /// Dia exibido na aba Anotar (índice 0-based).
 class SelectedDayNotifier extends Notifier<int> {
@@ -77,7 +87,9 @@ class SelectedDayNotifier extends Notifier<int> {
   void set(int i) => state = i;
 }
 
-final selectedDayProvider = NotifierProvider<SelectedDayNotifier, int>(SelectedDayNotifier.new);
+final selectedDayProvider = NotifierProvider<SelectedDayNotifier, int>(
+  SelectedDayNotifier.new,
+);
 
 /// Aba atual: 0 Anotar, 1 Resumo, 2 Mais.
 class TabNotifier extends Notifier<int> {

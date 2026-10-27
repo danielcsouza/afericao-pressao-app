@@ -6,8 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 Notebook _nb({Config config = const Config()}) => Notebook(config: config);
 
-Entry _both(String s, String d, {String p = ''}) =>
-    Entry(left: Reading(s: s, d: d, p: p), right: Reading(s: s, d: d, p: p));
+Entry _both(String s, String d, {String p = ''}) => Entry(
+  left: Reading(s: s, d: d, p: p),
+  right: Reading(s: s, d: d, p: p),
+);
 
 void main() {
   group('norm / fmtAvg', () {
@@ -29,7 +31,13 @@ void main() {
     test('contagens', () {
       var nb = _nb();
       nb = nb.withEntry(0, Period.m, _both('130', '80'));
-      nb = nb.withEntry(0, Period.t, const Entry(left: Reading(s: '120', d: '70')));
+      nb = nb.withEntry(
+        0,
+        Period.t,
+        const Entry(
+          left: Reading(s: '120', d: '70'),
+        ),
+      );
       final r = Rules(nb);
       expect(r.periodDone(0, Period.m), 2);
       expect(r.periodDone(0, Period.t), 1);
@@ -40,8 +48,14 @@ void main() {
 
     test('médias e diferença entre braços', () {
       var nb = _nb();
-      nb = nb.withEntry(0, Period.m,
-          const Entry(left: Reading(s: '13', d: '8', p: '70'), right: Reading(s: '120', d: '80', p: '72')));
+      nb = nb.withEntry(
+        0,
+        Period.m,
+        const Entry(
+          left: Reading(s: '13', d: '8', p: '70'),
+          right: Reading(s: '120', d: '80', p: '72'),
+        ),
+      );
       final r = Rules(nb);
       final av = r.averages();
       expect(av[Arm.left]!.s, 130);
@@ -62,8 +76,18 @@ void main() {
 
   group('configuração flexível', () {
     test('um braço só: período completo com um braço e sem diferença', () {
-      final cfg = const Config(arms: ArmsMode.right, days: 7, periods: [Period.m]);
-      var nb = _nb(config: cfg).withEntry(0, Period.m, const Entry(right: Reading(s: '12', d: '8')));
+      final cfg = const Config(
+        arms: ArmsMode.right,
+        days: 7,
+        periods: [Period.m],
+      );
+      var nb = _nb(config: cfg).withEntry(
+        0,
+        Period.m,
+        const Entry(
+          right: Reading(s: '12', d: '8'),
+        ),
+      );
       final r = Rules(nb);
       expect(cfg.totalSlots, 7);
       expect(r.periodComplete(0, Period.m), isTrue);
@@ -83,7 +107,8 @@ void main() {
 
     test('pulso desligado ignora a média de pulso', () {
       final cfg = const Config(pulse: false);
-      var nb = _nb(config: cfg).withEntry(0, Period.m, _both('130', '80', p: '70'));
+      var nb = _nb(config: cfg)
+          .withEntry(0, Period.m, _both('130', '80', p: '70'));
       expect(Rules(nb).averages()[Arm.left]!.p, isNull);
     });
 
@@ -101,12 +126,25 @@ void main() {
 
   group('JSON', () {
     test('ida e volta preserva tudo', () {
-      var nb = Notebook(
-        name: 'Maria',
-        start: '2026-03-01',
-        configured: true,
-        config: const Config(days: 15, arms: ArmsMode.left, pulse: false, periods: [Period.m, Period.n]),
-      ).withEntry(3, Period.m, const Entry(time: '08:00', left: Reading(s: '13', d: '8')));
+      var nb =
+          Notebook(
+            name: 'Maria',
+            start: '2026-03-01',
+            configured: true,
+            config: const Config(
+              days: 15,
+              arms: ArmsMode.left,
+              pulse: false,
+              periods: [Period.m, Period.n],
+            ),
+          ).withEntry(
+            3,
+            Period.m,
+            const Entry(
+              time: '08:00',
+              left: Reading(s: '13', d: '8'),
+            ),
+          );
       final back = Notebook.fromJson(nb.toJson());
       expect(back.name, 'Maria');
       expect(back.config.days, 15);
@@ -140,14 +178,27 @@ void main() {
       expect(applyInput(field: 's', raw: '1a3b4').value, '134');
       expect(applyInput(field: 's', raw: '12345').value, '123');
     });
-    test('pula para a baixa com 3 dígitos, separador ou 2 dígitos com baixa vazia', () {
-      expect(applyInput(field: 's', raw: '130').jumpToDiastolic, isTrue);
-      expect(applyInput(field: 's', raw: '13/').jumpToDiastolic, isTrue);
-      expect(applyInput(field: 's', raw: '13').jumpToDiastolic, isTrue);
-      expect(applyInput(field: 's', raw: '13', diastolicEmpty: false).jumpToDiastolic, isFalse);
-      expect(applyInput(field: 's', raw: '1').jumpToDiastolic, isFalse);
-      expect(applyInput(field: 's', raw: '130', inserting: false).jumpToDiastolic, isFalse);
-    });
+    test(
+      'pula para a baixa com 3 dígitos, separador ou 2 dígitos com baixa vazia',
+      () {
+        expect(applyInput(field: 's', raw: '130').jumpToDiastolic, isTrue);
+        expect(applyInput(field: 's', raw: '13/').jumpToDiastolic, isTrue);
+        expect(applyInput(field: 's', raw: '13').jumpToDiastolic, isTrue);
+        expect(
+          applyInput(
+            field: 's',
+            raw: '13',
+            diastolicEmpty: false,
+          ).jumpToDiastolic,
+          isFalse,
+        );
+        expect(applyInput(field: 's', raw: '1').jumpToDiastolic, isFalse);
+        expect(
+          applyInput(field: 's', raw: '130', inserting: false).jumpToDiastolic,
+          isFalse,
+        );
+      },
+    );
     test('formato do aparelho 12882 → 128/82', () {
       final c = applyInput(field: 'd', raw: '882', currentSystolic: '12');
       expect(c.systolic, '128');

@@ -1,6 +1,10 @@
 /// Digitação "como se fala": só dígitos, no máximo 3, e o formato do aparelho (12882 → 128/82).
 class FieldChange {
-  const FieldChange({required this.value, this.systolic, required this.jumpToDiastolic});
+  const FieldChange({
+    required this.value,
+    this.systolic,
+    required this.jumpToDiastolic,
+  });
 
   /// Novo valor do campo editado.
   final String value;
@@ -29,14 +33,19 @@ FieldChange applyInput({
   if (field == 'd') {
     final sv = currentSystolic;
     final n = int.tryParse(sv);
-    if (sv.length == 2 && n != null && n >= 10 && n <= 26 && (sv + v).length >= 5) {
+    if (sv.length == 2 &&
+        n != null &&
+        n >= 10 &&
+        n <= 26 &&
+        (sv + v).length >= 5) {
       final all = sv + v;
       newSystolic = all.substring(0, 3);
       v = all.substring(3);
     }
   }
 
-  final jump = field == 's' &&
+  final jump =
+      field == 's' &&
       v.isNotEmpty &&
       inserting &&
       (sep || v.length == 3 || (v.length == 2 && diastolicEmpty));

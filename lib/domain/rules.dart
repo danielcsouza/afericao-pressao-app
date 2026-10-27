@@ -8,7 +8,8 @@ double? norm(String v) {
 }
 
 /// 128.0 → "12,8" (a média é exibida em cm Hg com vírgula, como no app web).
-String fmtAvg(double? n) => n == null ? '–' : (n.round() / 10).toStringAsFixed(1).replaceAll('.', ',');
+String fmtAvg(double? n) =>
+    n == null ? '–' : (n.round() / 10).toStringAsFixed(1).replaceAll('.', ',');
 
 class ArmAverage {
   const ArmAverage({required this.sets, this.s, this.d, this.p});
@@ -40,10 +41,12 @@ class Rules {
   }
 
   /// Quantos braços ativos já estão completos no período.
-  int periodDone(int day, Period p) => cfg.activeArms.where((a) => armDone(day, p, a)).length;
+  int periodDone(int day, Period p) =>
+      cfg.activeArms.where((a) => armDone(day, p, a)).length;
 
   /// Preenchidos / esperados no período.
-  bool periodComplete(int day, Period p) => periodDone(day, p) == cfg.activeArms.length;
+  bool periodComplete(int day, Period p) =>
+      periodDone(day, p) == cfg.activeArms.length;
 
   int dayDone(int day) => cfg.periods.fold(0, (n, p) => n + periodDone(day, p));
 
@@ -55,7 +58,8 @@ class Rules {
     return n;
   }
 
-  int progressPercent() => cfg.totalSlots == 0 ? 0 : (totalDone() / cfg.totalSlots * 100).round();
+  int progressPercent() =>
+      cfg.totalSlots == 0 ? 0 : (totalDone() / cfg.totalSlots * 100).round();
 
   Map<Arm, ArmAverage> averages() {
     final out = <Arm, ArmAverage>{};
@@ -108,7 +112,9 @@ class Rules {
   int lastDayWithData() {
     var last = -1;
     for (final d in nb.data.entries) {
-      if (d.value.keys.any((p) => periodHasData(d.key, p)) && d.key > last) last = d.key;
+      if (d.value.keys.any((p) => periodHasData(d.key, p)) && d.key > last) {
+        last = d.key;
+      }
     }
     return last;
   }

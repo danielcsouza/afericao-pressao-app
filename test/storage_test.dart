@@ -6,10 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<(ProviderContainer, Storage)> _make([Map<String, Object> initial = const {}]) async {
+Future<(ProviderContainer, Storage)> _make([
+  Map<String, Object> initial = const {},
+]) async {
   SharedPreferences.setMockInitialValues(initial);
   final storage = Storage(await SharedPreferences.getInstance());
-  final c = ProviderContainer(overrides: [storageProvider.overrideWithValue(storage)]);
+  final c = ProviderContainer(
+    overrides: [storageProvider.overrideWithValue(storage)],
+  );
   addTearDown(c.dispose);
   return (c, storage);
 }
@@ -25,8 +29,19 @@ void main() {
   test('anotações e config sobrevivem a recarregar', () async {
     final (c, storage) = await _make();
     final n = c.read(notebookProvider.notifier);
-    n.finishSetup(name: '  Maria   Silva ', start: '2026-03-01', config: const Config(days: 7, arms: ArmsMode.left));
-    n.setEntry(0, Period.m, const Entry(time: '08:00', left: Reading(s: '13', d: '8', p: '70')));
+    n.finishSetup(
+      name: '  Maria   Silva ',
+      start: '2026-03-01',
+      config: const Config(days: 7, arms: ArmsMode.left),
+    );
+    n.setEntry(
+      0,
+      Period.m,
+      const Entry(
+        time: '08:00',
+        left: Reading(s: '13', d: '8', p: '70'),
+      ),
+    );
 
     final reloaded = storage.loadNotebook();
     expect(reloaded.configured, true);
@@ -40,8 +55,18 @@ void main() {
   test('apagar tudo mantém nome e config', () async {
     final (c, storage) = await _make();
     final n = c.read(notebookProvider.notifier);
-    n.finishSetup(name: 'Ana', start: '2026-03-01', config: const Config(days: 10));
-    n.setEntry(2, Period.t, const Entry(left: Reading(s: '12', d: '8')));
+    n.finishSetup(
+      name: 'Ana',
+      start: '2026-03-01',
+      config: const Config(days: 10),
+    );
+    n.setEntry(
+      2,
+      Period.t,
+      const Entry(
+        left: Reading(s: '12', d: '8'),
+      ),
+    );
     n.eraseAll();
     final nb = storage.loadNotebook();
     expect(nb.data, isEmpty);
@@ -52,9 +77,27 @@ void main() {
   test('limpar por período só afeta aquele período', () async {
     final (c, _) = await _make();
     final n = c.read(notebookProvider.notifier);
-    n.setEntry(0, Period.m, const Entry(left: Reading(s: '12', d: '8')));
-    n.setEntry(1, Period.m, const Entry(left: Reading(s: '12', d: '8')));
-    n.setEntry(0, Period.t, const Entry(left: Reading(s: '12', d: '8')));
+    n.setEntry(
+      0,
+      Period.m,
+      const Entry(
+        left: Reading(s: '12', d: '8'),
+      ),
+    );
+    n.setEntry(
+      1,
+      Period.m,
+      const Entry(
+        left: Reading(s: '12', d: '8'),
+      ),
+    );
+    n.setEntry(
+      0,
+      Period.t,
+      const Entry(
+        left: Reading(s: '12', d: '8'),
+      ),
+    );
     n.clearAllOfPeriod(Period.m);
     final nb = c.read(notebookProvider);
     expect(nb.entry(0, Period.m).isEmptyForTest, true);

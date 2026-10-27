@@ -45,19 +45,28 @@ class Reading {
 
 /// Anotação de um período de um dia: hora opcional e uma medição por braço.
 class Entry {
-  const Entry({this.time = '', this.left = const Reading(), this.right = const Reading()});
+  const Entry({
+    this.time = '',
+    this.left = const Reading(),
+    this.right = const Reading(),
+  });
   final String time;
   final Reading left;
   final Reading right;
 
   Reading arm(Arm a) => a == Arm.left ? left : right;
 
-  Entry withArm(Arm a, Reading r) =>
-      a == Arm.left ? Entry(time: time, left: r, right: right) : Entry(time: time, left: left, right: r);
+  Entry withArm(Arm a, Reading r) => a == Arm.left
+      ? Entry(time: time, left: r, right: right)
+      : Entry(time: time, left: left, right: r);
 
   Entry withTime(String t) => Entry(time: t, left: left, right: right);
 
-  Map<String, dynamic> toJson() => {'t': time, 'L': left.toJson(), 'R': right.toJson()};
+  Map<String, dynamic> toJson() => {
+    't': time,
+    'L': left.toJson(),
+    'R': right.toJson(),
+  };
 
   factory Entry.fromJson(Object? j) {
     if (j is! Map) return const Entry();
@@ -111,16 +120,17 @@ class Config {
   final Map<Period, ReminderConfig> reminders;
 
   List<Arm> get activeArms => switch (arms) {
-        ArmsMode.both => Arm.values,
-        ArmsMode.left => const [Arm.left],
-        ArmsMode.right => const [Arm.right],
-      };
+    ArmsMode.both => Arm.values,
+    ArmsMode.left => const [Arm.left],
+    ArmsMode.right => const [Arm.right],
+  };
 
   /// Medições possíveis por dia (períodos ativos × braços ativos).
   int get perDay => periods.length * activeArms.length;
   int get totalSlots => days * perDay;
 
-  ReminderConfig reminder(Period p) => reminders[p] ?? ReminderConfig(time: p.defaultTime);
+  ReminderConfig reminder(Period p) =>
+      reminders[p] ?? ReminderConfig(time: p.defaultTime);
 
   Config copyWith({
     int? days,
@@ -129,41 +139,53 @@ class Config {
     List<Period>? periods,
     bool? remindersOn,
     Map<Period, ReminderConfig>? reminders,
-  }) =>
-      Config(
-        days: (days ?? this.days).clamp(minDays, maxDays),
-        arms: arms ?? this.arms,
-        pulse: pulse ?? this.pulse,
-        periods: periods ?? this.periods,
-        remindersOn: remindersOn ?? this.remindersOn,
-        reminders: reminders ?? this.reminders,
-      );
+  }) => Config(
+    days: (days ?? this.days).clamp(minDays, maxDays),
+    arms: arms ?? this.arms,
+    pulse: pulse ?? this.pulse,
+    periods: periods ?? this.periods,
+    remindersOn: remindersOn ?? this.remindersOn,
+    reminders: reminders ?? this.reminders,
+  );
 
   Map<String, dynamic> toJson() => {
-        'days': days,
-        'arms': arms.name,
-        'pulse': pulse,
-        'periods': periods.map((p) => p.name).toList(),
-        'remindersOn': remindersOn,
-        'reminders': {for (final e in reminders.entries) e.key.name: e.value.toJson()},
-      };
+    'days': days,
+    'arms': arms.name,
+    'pulse': pulse,
+    'periods': periods.map((p) => p.name).toList(),
+    'remindersOn': remindersOn,
+    'reminders': {
+      for (final e in reminders.entries) e.key.name: e.value.toJson(),
+    },
+  };
 
   factory Config.fromJson(Object? j) {
     if (j is! Map) return const Config();
     final periods = <Period>[
       for (final p in Period.values)
-        if ((j['periods'] is List ? (j['periods'] as List) : const ['m', 't', 'n']).contains(p.name)) p,
+        if ((j['periods'] is List
+                ? (j['periods'] as List)
+                : const ['m', 't', 'n'])
+            .contains(p.name))
+          p,
     ];
     final rem = j['reminders'];
     return Config(
-      days: ((j['days'] is int ? j['days'] as int : 30)).clamp(minDays, maxDays),
-      arms: ArmsMode.values.firstWhere((a) => a.name == j['arms'], orElse: () => ArmsMode.both),
+      days: ((j['days'] is int ? j['days'] as int : 30)).clamp(
+        minDays,
+        maxDays,
+      ),
+      arms: ArmsMode.values.firstWhere(
+        (a) => a.name == j['arms'],
+        orElse: () => ArmsMode.both,
+      ),
       pulse: j['pulse'] != false,
       periods: periods.isEmpty ? const [Period.m, Period.t, Period.n] : periods,
       remindersOn: j['remindersOn'] == true,
       reminders: {
         for (final p in Period.values)
-          if (rem is Map && rem[p.name] != null) p: ReminderConfig.fromJson(rem[p.name], p.defaultTime),
+          if (rem is Map && rem[p.name] != null)
+            p: ReminderConfig.fromJson(rem[p.name], p.defaultTime),
       },
     );
   }
@@ -203,25 +225,32 @@ class Notebook {
     return copyWith(data: next);
   }
 
-  Notebook copyWith({String? name, String? start, bool? configured, Config? config, Map<int, Map<Period, Entry>>? data}) =>
-      Notebook(
-        name: name ?? this.name,
-        start: start ?? this.start,
-        configured: configured ?? this.configured,
-        config: config ?? this.config,
-        data: data ?? this.data,
-      );
+  Notebook copyWith({
+    String? name,
+    String? start,
+    bool? configured,
+    Config? config,
+    Map<int, Map<Period, Entry>>? data,
+  }) => Notebook(
+    name: name ?? this.name,
+    start: start ?? this.start,
+    configured: configured ?? this.configured,
+    config: config ?? this.config,
+    data: data ?? this.data,
+  );
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'start': start,
-        'configured': configured,
-        'config': config.toJson(),
-        'data': {
-          for (final d in data.entries)
-            '${d.key}': {for (final e in d.value.entries) e.key.name: e.value.toJson()},
+    'name': name,
+    'start': start,
+    'configured': configured,
+    'config': config.toJson(),
+    'data': {
+      for (final d in data.entries)
+        '${d.key}': {
+          for (final e in d.value.entries) e.key.name: e.value.toJson(),
         },
-      };
+    },
+  };
 
   factory Notebook.fromJson(Object? j) {
     if (j is! Map) return const Notebook();
