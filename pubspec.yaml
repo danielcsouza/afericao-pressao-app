@@ -57,6 +57,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
+  image: ^4.12.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -104,3 +107,22 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Ícone do app: dart run tool/gen_assets.dart && dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: false
+  # Ícone antigo (Android < 8) e base da ficha da loja.
+  image_path: "reference/icons/icon-512.png"
+  adaptive_icon_background: "assets/icons/ic_background.png"
+  adaptive_icon_foreground: "assets/icons/ic_foreground.png"
+  # Ícone temático do Android 13+ (só o alfa importa).
+  adaptive_icon_monochrome: "assets/icons/ic_foreground.png"
+
+# Splash: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#C0392B"
+  image: assets/icons/splash_heart.png
+  android_12:
+    color: "#C0392B"
+    image: assets/icons/splash_heart.png

@@ -75,7 +75,8 @@ class LocalNotificationService implements NotificationService {
     }
     await _plugin.initialize(
       settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        // Branco sobre transparente (gerado por tool/gen_assets.dart).
+        android: AndroidInitializationSettings('@drawable/ic_notification'),
       ),
     );
   }

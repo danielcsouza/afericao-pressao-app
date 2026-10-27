@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- O plugin de notificações busca o ícone pelo nome, em tempo de execução;
+     sem isto o encolhimento de recursos do build de release o removeria. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_notification" />
