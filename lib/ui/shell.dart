@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/providers.dart';
 import 'anotar_tab.dart';
+import 'mais_tab.dart';
 import 'resumo_tab.dart';
 import 'theme.dart';
 
@@ -43,7 +44,7 @@ class Shell extends ConsumerWidget {
                     children: const [
                       AnotarTab(),
                       ResumoTab(),
-                      _TabPlaceholder('Mais'),
+                      MaisTab(),
                     ],
                   ),
                 ),
@@ -179,17 +180,4 @@ class _BottomBar extends ConsumerWidget {
       ),
     );
   }
-}
-
-class _TabPlaceholder extends StatelessWidget {
-  const _TabPlaceholder(this.name);
-  final String name;
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Text(
-      name,
-      style: TextStyle(color: context.colors.muted, fontSize: 17),
-    ),
-  );
 }

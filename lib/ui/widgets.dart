@@ -196,3 +196,107 @@ Future<bool> confirm(
   );
   return r == true;
 }
+
+/// Botões segmentados (tema, braços, pulso…): borda de 2px; ativo em brand-soft.
+class SegButtons<T> extends StatelessWidget {
+  const SegButtons({
+    super.key,
+    required this.value,
+    required this.options,
+    required this.onChanged,
+  });
+  final T value;
+  final List<(T, String)> options;
+  final ValueChanged<T> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Row(
+      spacing: 8,
+      children: [
+        for (final (v, label) in options)
+          Expanded(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => onChanged(v),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 4,
+                ),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: v == value ? c.brandSoft : Colors.transparent,
+                  border: Border.all(
+                    color: v == value ? c.brand : c.line,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: v == value ? c.brand : c.ink,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+enum AppButtonKind { filled, ghost, danger }
+
+/// Botão largo das abas (btn / ghost / danger do app web).
+class AppButton extends StatelessWidget {
+  const AppButton(
+    this.label, {
+    super.key,
+    required this.onTap,
+    this.kind = AppButtonKind.filled,
+  });
+  final String label;
+  final VoidCallback? onTap;
+  final AppButtonKind kind;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final (bg, fg, border) = switch (kind) {
+      AppButtonKind.filled => (c.headerColor, AppColors.brandInk, null),
+      AppButtonKind.ghost => (c.card, c.ink, c.line),
+      AppButtonKind.danger => (c.card, c.danger, c.dangerLine),
+    };
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: bg,
+            foregroundColor: fg,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: border == null
+                  ? BorderSide.none
+                  : BorderSide(color: border, width: 2),
+            ),
+          ),
+          onPressed: onTap,
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ),
+    );
+  }
+}

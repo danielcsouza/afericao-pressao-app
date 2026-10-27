@@ -6,6 +6,7 @@ import '../app/providers.dart';
 import '../domain/dates.dart';
 import '../domain/models.dart';
 import '../domain/rules.dart';
+import 'actions.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
@@ -51,23 +52,6 @@ class _StartPanel extends ConsumerWidget {
         locale: const Locale('pt', 'BR'),
       );
       if (d != null) notifier.setStart(isoOf(d));
-    }
-
-    Future<void> setDays(int v) async {
-      if (v == days) return;
-      final last = ref.read(rulesProvider).lastDayWithData();
-      if (v - 1 < last) {
-        final ok = await confirm(
-          context,
-          title: 'Reduzir para $v dias?',
-          message:
-              'Há anotações até o dia ${last + 1}. Elas continuam guardadas, '
-              'mas não aparecem enquanto o caderno for menor.',
-          ok: 'Reduzir',
-        );
-        if (!ok) return;
-      }
-      notifier.setConfig(nb.config.copyWith(days: v));
     }
 
     return Panel(
@@ -127,7 +111,10 @@ class _StartPanel extends ConsumerWidget {
         const SizedBox(height: 12),
         Text('Duração (dias)', style: TextStyle(fontSize: 14, color: c.muted)),
         const SizedBox(height: 6),
-        DaysChips(days: days, onChanged: setDays),
+        DaysChips(
+          days: days,
+          onChanged: (v) => changeDays(context, ref, v),
+        ),
       ],
     );
   }
