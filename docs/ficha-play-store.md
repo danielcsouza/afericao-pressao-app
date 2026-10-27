@@ -54,13 +54,31 @@ FÁCIL DE USAR
 • Campos grandes e fáceis de tocar, teclado só com números e tema claro, escuro ou automático.
 
 AVISO IMPORTANTE
-Este aplicativo é apenas um caderno digital. Não é um dispositivo médico, não mede nem interpreta valores de pressão arterial e não substitui a orientação de um profissional de saúde. Em caso de mal-estar ou emergência, procure atendimento médico imediatamente (SAMU: 192).
+Este aplicativo não é um dispositivo médico e não diagnostica, trata, cura nem previne nenhuma condição médica. É apenas um caderno digital: ele não mede nem interpreta valores de pressão arterial. Consulte sempre um profissional de saúde para orientação, diagnóstico ou tratamento. Em caso de mal-estar ou emergência, procure atendimento médico imediatamente (SAMU: 192).
 <!--fim:longa-->
 
 ### Novidades desta versão (máx. 500)
 <!--ini:novidades-->
 Primeira versão do Diário da Pressão Arterial: anote sua pressão por dia e período, receba lembretes, veja as médias e leve tudo ao médico em PDF, planilha ou folha impressa.
 <!--fim:novidades-->
+
+> O aviso final da descrição segue a política "Conteúdo e serviços de saúde" da
+> Play: apps de saúde que não são dispositivo médico precisam dizer **na
+> descrição** que não são dispositivo médico, não diagnosticam/tratam/curam/previnem
+> condições e que se deve consultar um profissional de saúde. Não remover.
+
+### Tags (até 5; escolhidas na lista do Console)
+Escolher só as que descrevem o app (a Play pede "as mais obviamente relevantes";
+tag sem relação pode ser tratada como spam de metadados). Não precisa preencher 5.
+
+- **Saúde e fitness** (principal)
+- **Bloco de notas** (é um caderno de anotações)
+- Opcional: **Assistente pessoal** (lembretes)
+
+Evitar: **Medicina** (associa o app à categoria Medicina e às exigências de app
+médico), **Medição** (sugere ferramenta que mede), **Rastreador de atividades**,
+Dieta, Perda de peso, Sono, Meditação, Ioga, Treino (não são o app), e **Agenda**
+(é tag de calendário; o app não é agenda de compromissos).
 
 ## 2. Dados da ficha
 
@@ -131,3 +149,21 @@ Usar dados de exemplo fictícios (não usar nome ou valores de pessoa real).
 4. Se a conta de desenvolvedor for pessoal e recente, a Play pode exigir teste
    fechado com testadores por 14 dias antes da produção (conferir no Console).
 5. Subir o `versionCode` (número depois do `+` no `pubspec.yaml`) a cada novo envio.
+
+## 6. Atenção: tipo de conta de desenvolvedor (conferir ANTES de publicar)
+
+A Play exige **conta de organização** para quem publica "apps de saúde, como apps
+médicos e apps de pesquisa em seres humanos" (ajuda "Escolha um tipo de conta",
+item de requisitos). O artigo "Categorias de apps de saúde", que define o que
+conta como app médico, **não foi lido** (não abriu na consulta). Não foi possível
+confirmar se um diário de pressão declarado como "Controle de doenças e condições
+médicas" (que fica na seção Medicina da declaração) entra nessa exigência.
+
+O que fazer:
+1. No Console, em Configurações > Detalhes da conta, ver se a conta é **Organização** ou **Pessoal**.
+2. Se for **Organização**: sem problema; seguir o fluxo.
+3. Se for **Pessoal**: pode haver bloqueio na revisão. Consultar o suporte do
+   Console / o artigo "Health app categories" antes de enviar. A conta pode ser
+   convertida para organização (pede D-U-N-S e dados da empresa).
+4. **Não** trocar a declaração de saúde só para fugir da exigência: declarar o
+   que o app é de verdade. Declaração falsa pode suspender o app e a conta.
