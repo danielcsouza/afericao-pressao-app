@@ -147,7 +147,7 @@ void main() {
     });
   });
 
-  group('botões em Mais', () {
+  group('botões em Ajustes', () {
     testWidgets('imprimir e compartilhar chamam o serviço com o arquivo certo', (
       tester,
     ) async {
@@ -179,7 +179,7 @@ void main() {
         const Entry(left: Reading(s: '13', d: '8')),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Mais'));
+      await tester.tap(find.text('Ajustes'));
       await tester.pumpAndSettle();
 
       await tester.runAsync(() async {

@@ -121,7 +121,7 @@ class _BottomBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    final items = [('✍️', 'Anotar'), ('📅', 'Agenda'), ('⚙️', 'Mais')];
+    final items = [('✍️', 'Anotar'), ('📅', 'Agenda'), ('⚙️', 'Ajustes')];
     return Material(
       color: c.headerColor,
       elevation: 8,

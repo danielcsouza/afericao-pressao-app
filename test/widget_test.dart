@@ -31,7 +31,7 @@ void main() {
     expect(find.text('0%'), findsOneWidget);
     expect(find.text('Agenda'), findsOneWidget);
 
-    await tester.tap(find.text('Mais'));
+    await tester.tap(find.text('Ajustes'));
     await tester.pumpAndSettle();
     expect(find.text('Diário da Pressão'), findsOneWidget);
   });

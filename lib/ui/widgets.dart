@@ -77,7 +77,7 @@ class SmallButton extends StatelessWidget {
   );
 }
 
-/// Chips de duração (7/15/30/60/90/outro), usados no Resumo e em Mais.
+/// Chips de duração (7/15/30/60/90/outro), usados na Agenda e em Ajustes.
 class DaysChips extends StatelessWidget {
   const DaysChips({super.key, required this.days, required this.onChanged});
   final int days;

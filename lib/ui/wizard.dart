@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../app/providers.dart';
 import '../domain/dates.dart';
 import '../domain/models.dart';
+import 'actions.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
@@ -147,7 +148,9 @@ class _WizardState extends ConsumerState<Wizard> {
                       child: LayoutBuilder(
                         builder: (context, box) => SingleChildScrollView(
                           child: ConstrainedBox(
-                            constraints: BoxConstraints(minHeight: box.maxHeight),
+                            constraints: BoxConstraints(
+                              minHeight: box.maxHeight,
+                            ),
                             child: Center(child: _body(c)),
                           ),
                         ),
@@ -348,6 +351,16 @@ class _WizardState extends ConsumerState<Wizard> {
                         ),
                       ],
                     ),
+              // Confere a permissão já aqui, antes de começar a usar.
+              if (_remindersOn)
+                SizedBox(
+                  width: 320,
+                  child: _WizButton(
+                    '🔔 Enviar notificação de teste',
+                    filled: false,
+                    onTap: () => testNotifications(context, ref),
+                  ),
+                ),
             ],
           ),
         );
@@ -355,30 +368,78 @@ class _WizardState extends ConsumerState<Wizard> {
         return _Step(
           emoji: '✅',
           title: 'Tudo pronto!',
-          subtitle: _summary(),
-          child: const SizedBox.shrink(),
+          subtitle:
+              'Confira e toque em Começar. Dá para mudar tudo depois, '
+              'em Ajustes.',
+          child: _SummaryList(rows: _summary()),
         );
     }
   }
 
-  String _summary() {
+  /// Uma linha por escolha: (ícone, texto).
+  List<(String, String)> _summary() {
+    final fmt = DateFormat('dd/MM/yyyy');
+    final end = DateTime(_start.year, _start.month, _start.day + _days - 1);
     final periods = [
       for (final p in Period.values)
         if (_periods.contains(p)) p.label.toLowerCase(),
     ];
+    final periodText = periods.length == 1
+        ? periods.first
+        : '${periods.sublist(0, periods.length - 1).join(', ')} e ${periods.last}';
     final arms = switch (_arms) {
-      ArmsMode.both => 'os dois braços',
-      ArmsMode.left => 'braço esquerdo',
-      ArmsMode.right => 'braço direito',
+      ArmsMode.both => 'Os dois braços',
+      ArmsMode.left => 'Braço esquerdo',
+      ArmsMode.right => 'Braço direito',
     };
     return [
-      '$_days ${_days == 1 ? 'dia' : 'dias'}, a partir de ${DateFormat('dd/MM/yyyy').format(_start)}',
-      periods.join(', '),
-      arms,
-      _pulse ? 'com pulso' : 'sem pulso',
-      _remindersOn ? 'com lembretes' : 'sem lembretes',
-    ].join('\n');
+      (
+        '📆',
+        '$_days ${_days == 1 ? 'dia' : 'dias'}: '
+            '${fmt.format(_start)} a ${fmt.format(end)}',
+      ),
+      ('🕒', periodText[0].toUpperCase() + periodText.substring(1)),
+      ('💪', arms),
+      ('💓', _pulse ? 'Com pulso' : 'Sem pulso'),
+      ('🔔', _remindersOn ? 'Lembretes ligados' : 'Sem lembretes'),
+    ];
   }
+}
+
+class _SummaryList extends StatelessWidget {
+  const _SummaryList({required this.rows});
+  final List<(String, String)> rows;
+
+  @override
+  Widget build(BuildContext context) => ConstrainedBox(
+    constraints: const BoxConstraints(maxWidth: 340),
+    child: Column(
+      spacing: 8,
+      children: [
+        for (final (emoji, text) in rows)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: _white.withValues(alpha: .15),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              spacing: 12,
+              children: [
+                Text(emoji, style: const TextStyle(fontSize: 22)),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: const TextStyle(color: _white, fontSize: 17),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 class _Step extends StatelessWidget {

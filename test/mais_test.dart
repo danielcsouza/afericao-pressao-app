@@ -27,7 +27,7 @@ Future<ProviderContainer> _pump(
       .finishSetup(name: 'Ana', start: '2026-03-01', config: config);
   c.read(selectedDayProvider.notifier).set(0);
   await tester.pumpAndSettle();
-  await tester.tap(find.text('Mais'));
+  await tester.tap(find.text('Ajustes'));
   await tester.pumpAndSettle();
   return c;
 }

@@ -98,7 +98,7 @@ class ReminderConfig {
   }
 }
 
-/// Como o caderno está configurado (wizard e aba Mais).
+/// Como o caderno está configurado (wizard e aba Ajustes).
 class Config {
   const Config({
     this.days = 30,

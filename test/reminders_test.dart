@@ -164,7 +164,7 @@ void main() {
       expect(svc.syncs, isNotEmpty);
       expect(svc.syncs.last, isNotEmpty);
 
-      await tester.tap(find.text('Mais'));
+      await tester.tap(find.text('Ajustes'));
       await tester.pumpAndSettle();
 
       // permissão negada: aviso de bloqueio, nada enviado
