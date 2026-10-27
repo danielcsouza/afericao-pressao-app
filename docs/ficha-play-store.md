@@ -153,20 +153,39 @@ de exemplo com `adb run-as` e capturar com `adb exec-out screencap -p`.
    fechado com testadores por 14 dias antes da produção (conferir no Console).
 5. Subir o `versionCode` (número depois do `+` no `pubspec.yaml`) a cada novo envio.
 
-## 6. Atenção: tipo de conta de desenvolvedor (conferir ANTES de publicar)
+## 6. Atenção: conta PESSOAL e app de saúde (decidir ANTES de enviar)
 
-A Play exige **conta de organização** para quem publica "apps de saúde, como apps
-médicos e apps de pesquisa em seres humanos" (ajuda "Escolha um tipo de conta",
-item de requisitos). O artigo "Categorias de apps de saúde", que define o que
-conta como app médico, **não foi lido** (não abriu na consulta). Não foi possível
-confirmar se um diário de pressão declarado como "Controle de doenças e condições
-médicas" (que fica na seção Medicina da declaração) entra nessa exigência.
+O Daniel tem conta de desenvolvedor **pessoal**. Fontes oficiais (Ajuda do Play
+Console, "Escolha um tipo de conta" e "Categorias de apps de saúde"):
 
-O que fazer:
-1. No Console, em Configurações > Detalhes da conta, ver se a conta é **Organização** ou **Pessoal**.
-2. Se for **Organização**: sem problema; seguir o fluxo.
-3. Se for **Pessoal**: pode haver bloqueio na revisão. Consultar o suporte do
-   Console / o artigo "Health app categories" antes de enviar. A conta pode ser
-   convertida para organização (pede D-U-N-S e dados da empresa).
-4. **Não** trocar a declaração de saúde só para fugir da exigência: declarar o
-   que o app é de verdade. Declaração falsa pode suspender o app e a conta.
+- Exigem **conta de organização** para quem publica "apps de saúde, como apps
+  médicos e apps de pesquisa em seres humanos". "Apps de saúde e fitness" **não**
+  são citados nessa exigência.
+- Definem **app médico** como app que fornece informação, recursos ou
+  ferramentas para melhorar o cuidado médico, e a lista inclui expressamente
+  "**apps de controle de doenças**" (além de prontuário, telessaúde,
+  monitoramento remoto, verificadores de sintomas, apps de saúde pública e
+  software regulado como dispositivo médico).
+- A opção "Controle de doenças e condições médicas" da declaração fica na seção
+  **Medicina**. Declará-la equivale a se declarar app médico, o que **pode** exigir
+  conta de organização. Não há texto oficial dizendo como a Play trata um
+  diário pessoal que só registra pressão; a decisão é da revisão da Play.
+
+**Não** escolher outra opção só para fugir da exigência: declaração que não
+reflete o app arrisca suspensão. O app, de fato, registra medições de uma
+condição de saúde para o usuário levar ao médico.
+
+Caminhos (escolher um):
+1. **Perguntar ao suporte do Play Console** antes de enviar (Ajuda > Falar com o
+   suporte), descrevendo o app como caderno pessoal de anotações, que não mede,
+   não diagnostica e não envia dados, e pedindo orientação sobre a categoria
+   correta e sobre a conta. Guardar a resposta.
+2. **Enviar com a declaração honesta** e, se a revisão pedir, converter a conta
+   para organização. Exige dados da empresa e **número D-U-N-S** (gratuito, pelo
+   site da Dun & Bradstreet; leva alguns dias). Conferir no Console se a conta
+   pessoal pode ser convertida ou se é preciso criar outra.
+3. Se a revisão recusar por isso, a rejeição não é banimento: ajustar e reenviar.
+
+Lembrete: contas pessoais criadas depois de nov/2023 precisam de teste fechado
+(12 testadores por 14 dias) antes da produção; conferir no Console se vale para
+a conta do Daniel.
