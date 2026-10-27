@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -513,7 +514,8 @@ class _PeriodCardState extends ConsumerState<_PeriodCard> {
       child: TextField(
         controller: _ctrl[_key(a, f)],
         focusNode: _focus[_key(a, f)],
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         textAlign: TextAlign.center,
         style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
         onChanged: (v) => _onChanged(a, f, v),
