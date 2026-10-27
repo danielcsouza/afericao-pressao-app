@@ -7,6 +7,7 @@ import '../app/providers.dart';
 import '../domain/dates.dart';
 import '../domain/models.dart';
 import 'theme.dart';
+import 'widgets.dart';
 
 const _white = Colors.white;
 
@@ -88,41 +89,10 @@ class _WizardState extends ConsumerState<Wizard> {
   }
 
   Future<void> _pickCustomDays() async {
-    final ctrl = TextEditingController(
-      text: _presets.contains(_days) ? '' : '$_days',
-    );
-    final v = await showDialog<int>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Quantos dias?'),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          keyboardType: TextInputType.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(3),
-          ],
-          decoration: InputDecoration(
-            hintText: '${Config.minDays} a ${Config.maxDays}',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, int.tryParse(ctrl.text)),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-    ctrl.dispose();
+    final v = await askDays(context, _presets.contains(_days) ? null : _days);
     if (v != null) {
       setState(() {
-        _days = v.clamp(Config.minDays, Config.maxDays);
+        _days = v;
         _customDays = !_presets.contains(_days);
       });
     }
@@ -171,11 +141,15 @@ class _WizardState extends ConsumerState<Wizard> {
                 child: Column(
                   children: [
                     _Dots(count: _steps, index: _step),
+                    // Centraliza o passo na área livre; rola se faltar espaço
+                    // (teclado aberto, fonte grande).
                     Expanded(
-                      child: SingleChildScrollView(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(minHeight: 380),
-                          child: Center(child: _body(c)),
+                      child: LayoutBuilder(
+                        builder: (context, box) => SingleChildScrollView(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(minHeight: box.maxHeight),
+                            child: Center(child: _body(c)),
+                          ),
                         ),
                       ),
                     ),
@@ -358,9 +332,14 @@ class _WizardState extends ConsumerState<Wizard> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       spacing: 10,
                       children: [
-                        Text(
-                          '${p.icon} ${p.label} até',
-                          style: const TextStyle(color: _white, fontSize: 17),
+                        // Largura fixa: os horários ficam alinhados em coluna.
+                        SizedBox(
+                          width: 150,
+                          child: Text(
+                            '${p.icon} ${p.label} até',
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(color: _white, fontSize: 17),
+                          ),
                         ),
                         _Choice(
                           _times[p]!,

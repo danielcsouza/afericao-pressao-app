@@ -141,15 +141,47 @@ class _DaysChip extends StatelessWidget {
 
 /// Pergunta quantos dias (1–365). Devolve null se cancelar ou digitar algo inválido.
 Future<int?> askDays(BuildContext context, int? current) async {
-  final ctrl = TextEditingController(text: current == null ? '' : '$current');
   final v = await showDialog<int>(
     context: context,
-    builder: (ctx) => AlertDialog(
+    builder: (_) => _DaysDialog(current: current),
+  );
+  return v?.clamp(Config.minDays, Config.maxDays);
+}
+
+/// O diálogo é dono do controlador: ele só é descartado quando a rota some
+/// de vez (descartar logo após o `pop` quebra a animação de saída).
+class _DaysDialog extends StatefulWidget {
+  const _DaysDialog({this.current});
+  final int? current;
+
+  @override
+  State<_DaysDialog> createState() => _DaysDialogState();
+}
+
+class _DaysDialogState extends State<_DaysDialog> {
+  late final _ctrl = TextEditingController(
+    text: widget.current == null ? '' : '${widget.current}',
+  );
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() => Navigator.pop(context, int.tryParse(_ctrl.text));
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
       title: const Text('Quantos dias?'),
       content: TextField(
-        controller: ctrl,
+        controller: _ctrl,
         autofocus: true,
         keyboardType: TextInputType.number,
+        // "Concluído" no teclado confirma, igual ao botão OK.
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) => _submit(),
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
           LengthLimitingTextInputFormatter(3),
@@ -160,18 +192,13 @@ Future<int?> askDays(BuildContext context, int? current) async {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(ctx),
+          onPressed: () => Navigator.pop(context),
           child: const Text('Cancelar'),
         ),
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, int.tryParse(ctrl.text)),
-          child: const Text('OK'),
-        ),
+        TextButton(onPressed: _submit, child: const Text('OK')),
       ],
-    ),
-  );
-  ctrl.dispose();
-  return v?.clamp(Config.minDays, Config.maxDays);
+    );
+  }
 }
 
 Future<bool> confirm(
