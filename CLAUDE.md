@@ -12,7 +12,7 @@ Duração 1–365 dias; até 3 períodos (manhã/tarde/noite), cada um opcional 
 
 ## Estado
 Feito: projeto criado, dependências, `lib/domain/` (models, rules, dates, input) com testes em `test/domain_test.dart` (18 passando); armazenamento (`lib/data/storage.dart`), providers Riverpod (`lib/app/providers.dart`), tema com tokens do PWA (`lib/ui/theme.dart`), `Shell` com cabeçalho + barra inferior e abas ainda vazias (`lib/ui/shell.dart`); `SetupGate` mostra o wizard de 7 passos (`lib/ui/wizard.dart`) até o caderno ser configurado; o pedido de permissão de notificação fica para a etapa de notificações. Aba Anotar pronta (`lib/ui/anotar_tab.dart`: navegação por dia, cartões por período, campos com a digitação "como falamos", limpar período). Aba Resumo pronta (`lib/ui/resumo_tab.dart`; painéis e chips de duração em `lib/ui/widgets.dart`, reaproveitáveis em Mais). Aba Mais pronta, sem imprimir/exportar (`lib/ui/mais_tab.dart`; regra de mudar duração em `lib/ui/actions.dart`). 46 testes passando; app roda no emulador (build exige core library desugaring, já configurado). Nos testes de widget, fixe o dia com `selectedDayProvider.set(0)`: o app abre no dia de hoje.
-Próximos passos (ordem do plano): PDF/CSV/impressão (inclui os painéis 🖨️ Imprimir e 📤 Exportar em Mais) → PDF/CSV/impressão → notificações locais → ícone/splash/build `.aab` → ficha da Play Store.
+Próximos passos (ordem do plano): PDF/CSV/impressão (inclui os painéis 🖨️ Imprimir e 📤 Exportar em Mais) → notificações locais → ícone/splash/build `.aab` → ficha da Play Store.
 
 ## Comandos
 `flutter test` · `flutter analyze` · `flutter run`
