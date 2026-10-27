@@ -123,6 +123,10 @@ flutter_launcher_icons:
 flutter_native_splash:
   color: "#C0392B"
   image: assets/icons/splash_heart.png
+  # Nome embaixo do coração (imagem gerada por tool/gen_splash_brand_test.dart).
+  branding: assets/icons/splash_brand.png
+  branding_bottom_padding: 64
   android_12:
     color: "#C0392B"
     image: assets/icons/splash_heart.png
+    branding: assets/icons/splash_brand.png
