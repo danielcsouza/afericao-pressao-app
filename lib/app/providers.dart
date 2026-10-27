@@ -7,6 +7,7 @@ import '../domain/dates.dart';
 import '../domain/models.dart';
 import '../domain/reminders.dart';
 import '../domain/rules.dart';
+import '../export/export_service.dart';
 import '../notifications/notification_service.dart';
 
 /// Sobrescrito em `main` com a instância já carregada.
@@ -135,3 +136,8 @@ final reminderSyncProvider = Provider<ReminderSyncer>((ref) {
   );
   return syncer;
 });
+
+/// Impressão e compartilhamento; os testes trocam por um falso.
+final exportServiceProvider = Provider<ExportService>(
+  (ref) => const PlatformExportService(),
+);

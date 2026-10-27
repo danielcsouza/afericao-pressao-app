@@ -4,12 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/providers.dart';
 import '../domain/models.dart';
+import '../export/export_actions.dart';
 import 'actions.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
-/// Aba Mais: paciente, tema, lembretes, ajustes do caderno e recomeçar.
-/// (Imprimir e exportar entram com o PDF/CSV.)
+/// Aba Mais: paciente, tema, lembretes, ajustes do caderno, imprimir,
+/// exportar e recomeçar.
 class MaisTab extends StatelessWidget {
   const MaisTab({super.key});
 
@@ -22,6 +23,8 @@ class MaisTab extends StatelessWidget {
         const _ThemePanel(),
         const _RemindersPanel(),
         const _SetupPanel(),
+        const _PrintPanel(),
+        const _ExportPanel(),
         const _ResetPanel(),
         Padding(
           padding: const EdgeInsets.only(top: 4),
@@ -352,6 +355,52 @@ class _ResetPanel extends ConsumerWidget {
             );
             if (ok) notifier.eraseAll();
           },
+        ),
+      ],
+    );
+  }
+}
+
+class _PrintPanel extends ConsumerWidget {
+  const _PrintPanel();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Panel(
+      title: '🖨️ Imprimir',
+      children: [
+        const PanelText('Folha A4 deitada, até 15 dias por folha.'),
+        AppButton(
+          'Folha em branco, para escrever à mão',
+          onTap: () => printSheet(context, ref, filled: false),
+        ),
+        AppButton(
+          'Folha com os valores já anotados',
+          kind: AppButtonKind.ghost,
+          onTap: () => printSheet(context, ref, filled: true),
+        ),
+      ],
+    );
+  }
+}
+
+class _ExportPanel extends ConsumerWidget {
+  const _ExportPanel();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Panel(
+      title: '📤 Exportar',
+      children: [
+        const PanelText('Para mandar ao médico por WhatsApp ou e-mail.'),
+        AppButton(
+          'PDF com as medições',
+          onTap: () => exportPdf(context, ref),
+        ),
+        AppButton(
+          'Planilha (CSV, abre no Excel)',
+          kind: AppButtonKind.ghost,
+          onTap: () => exportCsv(context, ref),
         ),
       ],
     );
