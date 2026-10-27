@@ -255,9 +255,20 @@ class _PeriodCardState extends ConsumerState<_PeriodCard> {
       'd' => r.copyWith(d: ch.value, s: ch.systolic ?? r.s),
       _ => r.copyWith(p: ch.value),
     };
+    var entry = _entry.withArm(arm, next);
+    // A hora é importante para o médico: ao anotar o primeiro valor de um
+    // período de hoje, já registra a hora atual (dá para corrigir no campo).
+    // Em dias passados não chuta: o campo fica destacado pedindo a hora.
+    final now = ref.read(clockProvider)();
+    final start = ref.read(notebookProvider).start;
+    if (entry.time.isEmpty &&
+        ch.value.isNotEmpty &&
+        widget.day == todayIndex(start, now)) {
+      entry = entry.withTime(hhmm(now));
+    }
     ref
         .read(notebookProvider.notifier)
-        .setEntry(widget.day, widget.period, _entry.withArm(arm, next));
+        .setEntry(widget.day, widget.period, entry);
     if (ch.jumpToDiastolic) _focus[_key(arm, 'd')]!.requestFocus();
   }
 
@@ -322,8 +333,13 @@ class _PeriodCardState extends ConsumerState<_PeriodCard> {
     final e = nb.entry(widget.day, widget.period);
     final done = rules.periodDone(widget.day, widget.period);
     final complete = rules.periodComplete(widget.day, widget.period);
+    // Há valores mas falta a hora: destaca o campo e o selo (a hora é
+    // obrigatória e o período não conta como completo sem ela).
+    final missingTime = rules.missingTime(widget.day, widget.period);
 
-    final (badge, badgeFg, badgeBg, border) = complete
+    final (badge, badgeFg, badgeBg, border) = missingTime
+        ? ('falta a hora', c.warn, c.warnSoft, c.warn)
+        : complete
         ? ('✓ completo', c.ok, c.okSoft, c.ok)
         : done > 0
         ? ('falta 1 braço', c.warn, c.warnSoft, c.warn)
@@ -353,7 +369,14 @@ class _PeriodCardState extends ConsumerState<_PeriodCard> {
                   ),
                 ),
               ),
-              Text('Hora', style: TextStyle(fontSize: 14, color: c.muted)),
+              Text(
+                'Hora',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: missingTime ? c.warn : c.muted,
+                  fontWeight: missingTime ? FontWeight.w700 : FontWeight.w400,
+                ),
+              ),
               const SizedBox(width: 4),
               InkWell(
                 borderRadius: BorderRadius.circular(10),
@@ -363,8 +386,11 @@ class _PeriodCardState extends ConsumerState<_PeriodCard> {
                   padding: const EdgeInsets.symmetric(vertical: 7),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: c.bg,
-                    border: Border.all(color: c.line),
+                    color: missingTime ? c.warnSoft : c.bg,
+                    border: Border.all(
+                      color: missingTime ? c.warn : c.line,
+                      width: missingTime ? 2 : 1,
+                    ),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(

@@ -32,7 +32,18 @@ class Rules {
 
   Config get cfg => nb.config;
 
-  bool armDone(int day, Period p, Arm a) => nb.entry(day, p).arm(a).done;
+  /// Medição de um braço feita: alta e baixa preenchidas **e a hora informada**
+  /// (a hora é obrigatória: o médico precisa saber quando foi medido).
+  bool armDone(int day, Period p, Arm a) {
+    final e = nb.entry(day, p);
+    return e.time.isNotEmpty && e.arm(a).done;
+  }
+
+  /// Há valores anotados no período mas falta a hora.
+  bool missingTime(int day, Period p) {
+    final e = nb.entry(day, p);
+    return e.time.isEmpty && cfg.activeArms.any((a) => !e.arm(a).isEmpty);
+  }
 
   bool periodHasData(int day, Period p) {
     final e = nb.entry(day, p);

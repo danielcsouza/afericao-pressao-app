@@ -1,6 +1,7 @@
 import 'package:diario_pressao/app/providers.dart';
 import 'package:diario_pressao/data/storage.dart';
 import 'package:diario_pressao/domain/models.dart';
+import 'package:diario_pressao/domain/rules.dart';
 import 'package:diario_pressao/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +18,11 @@ Future<ProviderContainer> _pump(
   addTearDown(() => tester.binding.setSurfaceSize(null));
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [storageProvider.overrideWithValue(storage)],
+      overrides: [
+        storageProvider.overrideWithValue(storage),
+        // "Hoje" é o dia 1 do caderno, 09:30 (a hora atual é sugerida ao anotar).
+        clockProvider.overrideWithValue(() => DateTime(2026, 3, 1, 9, 30)),
+      ],
       child: const DiarioApp(),
     ),
   );
@@ -85,6 +90,72 @@ void main() {
     await tester.enterText(_fields.at(1), '80');
     await tester.pumpAndSettle();
     expect(find.text('falta 1 braço'), findsOneWidget);
+  });
+
+  group('hora obrigatória', () {
+    final one = const Config(periods: [Period.m], arms: ArmsMode.left);
+
+    testWidgets('hoje: a hora atual é sugerida ao anotar o primeiro valor', (
+      tester,
+    ) async {
+      final c = await _pump(tester, config: one);
+      expect(c.read(notebookProvider).entry(0, Period.m).time, '');
+      await tester.enterText(_fields.at(0), '13');
+      await tester.pumpAndSettle();
+      expect(c.read(notebookProvider).entry(0, Period.m).time, '09:30');
+      expect(find.text('09:30'), findsOneWidget); // aparece no campo Hora
+    });
+
+    testWidgets('a hora escolhida pela pessoa não é sobrescrita', (
+      tester,
+    ) async {
+      final c = await _pump(tester, config: one);
+      c
+          .read(notebookProvider.notifier)
+          .setEntry(0, Period.m, const Entry(time: '07:45'));
+      await tester.pumpAndSettle();
+      await tester.enterText(_fields.at(0), '13');
+      await tester.pumpAndSettle();
+      expect(c.read(notebookProvider).entry(0, Period.m).time, '07:45');
+    });
+
+    testWidgets(
+      'dia passado: não chuta a hora, avisa e não conta como completo',
+      (tester) async {
+        final c = await _pump(
+          tester,
+          config: const Config(
+            days: 3,
+            periods: [Period.m],
+            arms: ArmsMode.left,
+          ),
+        );
+        await tester.tap(find.text('›')); // dia 2 (não é hoje)
+        await tester.pumpAndSettle();
+        await tester.enterText(_fields.at(0), '13');
+        await tester.pump();
+        await tester.enterText(_fields.at(1), '8');
+        await tester.pumpAndSettle();
+
+        expect(c.read(notebookProvider).entry(1, Period.m).time, '');
+        expect(find.text('falta a hora'), findsOneWidget);
+        expect(find.text('✓ completo'), findsNothing);
+        expect(Rules(c.read(notebookProvider)).totalDone(), 0);
+
+        // informando a hora, o período passa a contar
+        c
+            .read(notebookProvider.notifier)
+            .setEntry(
+              1,
+              Period.m,
+              c.read(notebookProvider).entry(1, Period.m).withTime('08:10'),
+            );
+        await tester.pumpAndSettle();
+        expect(find.text('falta a hora'), findsNothing);
+        expect(find.text('✓ completo'), findsOneWidget);
+        expect(Rules(c.read(notebookProvider)).totalDone(), 1);
+      },
+    );
   });
 
   testWidgets('sem pulso não mostra o campo de pulso', (tester) async {

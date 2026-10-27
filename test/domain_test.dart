@@ -6,7 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 Notebook _nb({Config config = const Config()}) => Notebook(config: config);
 
-Entry _both(String s, String d, {String p = ''}) => Entry(
+/// Com hora: sem ela a medição não conta como feita (a hora é obrigatória).
+Entry _both(String s, String d, {String p = '', String time = '08:00'}) => Entry(
+  time: time,
   left: Reading(s: s, d: d, p: p),
   right: Reading(s: s, d: d, p: p),
 );
@@ -35,6 +37,7 @@ void main() {
         0,
         Period.t,
         const Entry(
+          time: '14:00',
           left: Reading(s: '120', d: '70'),
         ),
       );
@@ -44,6 +47,26 @@ void main() {
       expect(r.dayDone(0), 3);
       expect(r.totalDone(), 3);
       expect(nb.config.totalSlots, 180);
+    });
+
+    test('a hora é obrigatória: sem ela a medição não conta como feita', () {
+      var nb = _nb().withEntry(0, Period.m, _both('130', '80', time: ''));
+      var r = Rules(nb);
+      expect(r.missingTime(0, Period.m), isTrue);
+      expect(r.periodDone(0, Period.m), 0);
+      expect(r.periodComplete(0, Period.m), isFalse);
+      expect(r.totalDone(), 0);
+      // os valores continuam valendo para as médias
+      expect(r.averages()[Arm.left]!.sets, 1);
+
+      nb = nb.withEntry(0, Period.m, _both('130', '80', time: '08:15'));
+      r = Rules(nb);
+      expect(r.missingTime(0, Period.m), isFalse);
+      expect(r.periodDone(0, Period.m), 2);
+      expect(r.totalDone(), 2);
+
+      // período vazio não "falta hora"
+      expect(r.missingTime(0, Period.t), isFalse);
     });
 
     test('médias e diferença entre braços', () {
@@ -85,6 +108,7 @@ void main() {
         0,
         Period.m,
         const Entry(
+          time: '08:00',
           right: Reading(s: '12', d: '8'),
         ),
       );

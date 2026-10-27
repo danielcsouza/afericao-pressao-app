@@ -350,7 +350,11 @@ class _AveragesPanel extends ConsumerWidget {
                   text: fmtAvg(diff.avg),
                   style: TextStyle(fontWeight: FontWeight.w700, color: c.ink),
                 ),
-                TextSpan(text: ' (em ${diff.n} horários com os dois braços).'),
+                TextSpan(
+                  text:
+                      ' (em ${diff.n} ${diff.n == 1 ? 'horário' : 'horários'} '
+                      'com os dois braços).',
+                ),
               ],
             ),
           ),

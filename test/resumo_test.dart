@@ -71,6 +71,7 @@ void main() {
       0,
       Period.m,
       const Entry(
+        time: '08:00',
         left: Reading(s: '13', d: '8', p: '70'),
         right: Reading(s: '12', d: '8', p: '72'),
       ),
@@ -80,7 +81,7 @@ void main() {
     expect(find.text('12,0 / 8,0'), findsOneWidget);
     expect(find.text('70'), findsOneWidget);
     expect(
-      find.textContaining('em 1 horários com os dois braços'),
+      find.textContaining('em 1 horário com os dois braços'),
       findsOneWidget,
     );
     expect(find.text('2 de 42 medições feitas'), findsNothing);

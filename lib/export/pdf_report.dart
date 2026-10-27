@@ -383,7 +383,8 @@ pw.Widget _summary(Notebook nb, DateTime now) {
       if (diff != null) ...[
         pw.Text(
           'Diferença média da alta entre os braços: ${fmtAvg(diff.avg)}  '
-          '(em ${diff.n} horários com os dois braços)',
+          '(em ${diff.n} ${diff.n == 1 ? 'horário' : 'horários'} '
+          'com os dois braços)',
           style: const pw.TextStyle(fontSize: 11),
         ),
         pw.SizedBox(height: 8),

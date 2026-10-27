@@ -24,3 +24,7 @@ int? todayIndex(String start, [DateTime? now]) {
   final t1 = DateTime.utc(n.year, n.month, n.day);
   return t1.difference(t0).inDays;
 }
+
+/// "08:05": hora e minuto com dois dígitos.
+String hhmm(DateTime t) =>
+    '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';

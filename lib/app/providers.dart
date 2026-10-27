@@ -141,3 +141,6 @@ final reminderSyncProvider = Provider<ReminderSyncer>((ref) {
 final exportServiceProvider = Provider<ExportService>(
   (ref) => const PlatformExportService(),
 );
+
+/// "Agora" do app; os testes trocam por um relógio fixo.
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
