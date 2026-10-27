@@ -7,6 +7,7 @@ import '../app/providers.dart';
 import '../domain/dates.dart';
 import '../domain/input.dart';
 import '../domain/models.dart';
+import 'actions.dart';
 import 'theme.dart';
 
 /// Aba Anotar: navegação por dia e um cartão por período ativo.
@@ -23,8 +24,11 @@ class AnotarTab extends ConsumerWidget {
     final first = nb.name.split(' ').first;
     final date = dateOf(nb.start, day);
 
-    void go(int i) =>
-        ref.read(selectedDayProvider.notifier).set(i.clamp(0, days - 1));
+    // Antes de trocar de dia, confere se não ficou um registro pela metade.
+    Future<void> go(int i) async {
+      if (!await canLeaveDay(context, ref, day)) return;
+      ref.read(selectedDayProvider.notifier).set(i.clamp(0, days - 1));
+    }
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
@@ -255,6 +259,8 @@ class _PeriodCardState extends ConsumerState<_PeriodCard> {
       'd' => r.copyWith(d: ch.value, s: ch.systolic ?? r.s),
       _ => r.copyWith(p: ch.value),
     };
+    // Só o que a pessoa mexe aqui pode barrá-la ao sair do dia se ficar pela metade.
+    ref.read(editedPeriodsProvider.notifier).mark(widget.day, widget.period);
     var entry = _entry.withArm(arm, next);
     // A hora é importante para o médico: ao anotar o primeiro valor de um
     // período de hoje, já registra a hora atual (dá para corrigir no campo).
@@ -291,6 +297,7 @@ class _PeriodCardState extends ConsumerState<_PeriodCard> {
     if (t == null) return;
     final s =
         '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+    ref.read(editedPeriodsProvider.notifier).mark(widget.day, widget.period);
     ref
         .read(notebookProvider.notifier)
         .setEntry(widget.day, widget.period, _entry.withTime(s));
@@ -321,6 +328,9 @@ class _PeriodCardState extends ConsumerState<_PeriodCard> {
       ref
           .read(notebookProvider.notifier)
           .clearPeriod(widget.day, widget.period);
+      ref
+          .read(editedPeriodsProvider.notifier)
+          .unmark(widget.day, widget.period);
     }
   }
 

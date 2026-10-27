@@ -144,3 +144,22 @@ final exportServiceProvider = Provider<ExportService>(
 
 /// "Agora" do app; os testes trocam por um relógio fixo.
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
+/// Períodos que a pessoa editou nesta visita ao app (dia, período). Só eles
+/// impedem sair do dia se ficarem incompletos: quem só está olhando ou
+/// conferindo nunca fica preso. Não é gravado: ao reabrir o app começa vazio.
+class EditedPeriodsNotifier extends Notifier<Set<(int, Period)>> {
+  @override
+  Set<(int, Period)> build() => {};
+
+  void mark(int day, Period p) {
+    if (!state.contains((day, p))) state = {...state, (day, p)};
+  }
+
+  void unmark(int day, Period p) => state = {...state}..remove((day, p));
+}
+
+final editedPeriodsProvider =
+    NotifierProvider<EditedPeriodsNotifier, Set<(int, Period)>>(
+      EditedPeriodsNotifier.new,
+    );

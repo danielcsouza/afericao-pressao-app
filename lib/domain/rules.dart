@@ -25,6 +25,29 @@ class ArmDiff {
   final int n;
 }
 
+/// Motivo de um período ter sido começado mas estar incompleto.
+enum Incomplete {
+  /// Tem valores, mas falta a hora (obrigatória).
+  missingTime,
+
+  /// Tem alta sem baixa (ou o contrário) em algum braço.
+  halfReading,
+
+  /// Tem hora, mas nenhum valor de medição.
+  timeWithoutValues,
+}
+
+class IncompleteEntry {
+  const IncompleteEntry({
+    required this.day,
+    required this.period,
+    required this.reason,
+  });
+  final int day;
+  final Period period;
+  final Incomplete reason;
+}
+
 /// Todas as regras do caderno, calculadas sobre um [Notebook] e sua [Config].
 class Rules {
   const Rules(this.nb);
@@ -50,6 +73,29 @@ class Rules {
     if (e.time.isNotEmpty) return true;
     return Arm.values.any((a) => !e.arm(a).isEmpty);
   }
+
+  /// Por que o período não pode ser deixado como está, ou null se está em
+  /// ordem. Período **vazio** é sempre válido (dá para navegar sem digitar
+  /// nada); depois de começado, exige a hora e, em cada braço usado, alta e
+  /// baixa (o pulso continua opcional).
+  Incomplete? incompleteReason(int day, Period p) {
+    final e = nb.entry(day, p);
+    final touched = cfg.activeArms.where((a) => !e.arm(a).isEmpty).toList();
+    if (touched.isEmpty) {
+      return e.time.isEmpty ? null : Incomplete.timeWithoutValues;
+    }
+    if (e.time.isEmpty) return Incomplete.missingTime;
+    if (touched.any((a) => !e.arm(a).done)) return Incomplete.halfReading;
+    return null;
+  }
+
+  /// Períodos incompletos do caderno (todos os dias, ou só [day]), em ordem.
+  List<IncompleteEntry> incompleteEntries({int? day}) => [
+    for (var d = day ?? 0; d < (day == null ? cfg.days : day + 1); d++)
+      for (final p in cfg.periods)
+        if (incompleteReason(d, p) case final reason?)
+          IncompleteEntry(day: d, period: p, reason: reason),
+  ];
 
   /// Quantos braços ativos já estão completos no período.
   int periodDone(int day, Period p) =>

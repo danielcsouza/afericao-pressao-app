@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/providers.dart';
+import 'actions.dart';
 import 'anotar_tab.dart';
 import 'mais_tab.dart';
 import 'resumo_tab.dart';
@@ -29,29 +30,37 @@ class Shell extends ConsumerWidget {
         systemNavigationBarColor: c.headerColor,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
-      child: Scaffold(
-        backgroundColor: c.bg,
-        body: Column(
-          children: [
-            _Header(title: title, percent: percent),
-            Expanded(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 640),
-                  child: IndexedStack(
-                    index: tab,
-                    children: const [
-                      AnotarTab(),
-                      ResumoTab(),
-                      MaisTab(),
-                    ],
+      // O botão voltar não fecha o app com um registro pela metade: o aviso
+      // oferece completar ou apagar; sem pendência, sai normalmente.
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) async {
+          if (didPop) return;
+          final day = ref.read(selectedDayProvider);
+          if (await canLeaveDay(context, ref, day)) {
+            await SystemNavigator.pop();
+          }
+        },
+        child: Scaffold(
+          backgroundColor: c.bg,
+          body: Column(
+            children: [
+              _Header(title: title, percent: percent),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 640),
+                    child: IndexedStack(
+                      index: tab,
+                      children: const [AnotarTab(), ResumoTab(), MaisTab()],
+                    ),
                   ),
                 ),
               ),
-            ),
-            _BottomBar(index: tab),
-          ],
+              _BottomBar(index: tab),
+            ],
+          ),
         ),
       ),
     );
@@ -135,7 +144,14 @@ class _BottomBar extends ConsumerWidget {
               for (var i = 0; i < items.length; i++)
                 Expanded(
                   child: InkWell(
-                    onTap: () => ref.read(tabProvider.notifier).set(i),
+                    onTap: () async {
+                      // Saindo da aba Anotar, confere se não ficou registro pela metade.
+                      if (index == 0 && i != 0) {
+                        final day = ref.read(selectedDayProvider);
+                        if (!await canLeaveDay(context, ref, day)) return;
+                      }
+                      ref.read(tabProvider.notifier).set(i);
+                    },
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [

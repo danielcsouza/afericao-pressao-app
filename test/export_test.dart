@@ -176,7 +176,7 @@ void main() {
       c.read(notebookProvider.notifier).setEntry(
         0,
         Period.m,
-        const Entry(left: Reading(s: '13', d: '8')),
+        const Entry(time: '08:00', left: Reading(s: '13', d: '8')),
       );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Ajustes'));
