@@ -150,7 +150,7 @@ String _legend(Config cfg) {
   return 'Pressão: escreva alta/baixa, como 13/8 (alta = sistólica, baixa = '
       'diastólica). Hora: horário da medição. '
       '${cfg.pulse ? 'Pulso: batimentos por minuto (opcional). ' : ''}'
-      'Medir $times ao dia — $list — $arms, sentada e em repouso.';
+      'Medir $times ao dia — $list — $arms, com a pessoa sentada e em repouso.';
 }
 
 pw.Widget _table(Notebook nb, ReportKind kind, int from, int to, bool blank) {

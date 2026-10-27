@@ -10,7 +10,7 @@ import 'theme.dart';
 import 'widgets.dart';
 
 /// Aba Mais: paciente, tema, lembretes, ajustes do caderno, imprimir,
-/// exportar e recomeçar.
+/// compartilhar e recomeçar.
 class MaisTab extends StatelessWidget {
   const MaisTab({super.key});
 
@@ -390,7 +390,7 @@ class _ExportPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Panel(
-      title: '📤 Exportar',
+      title: '📤 Compartilhar',
       children: [
         const PanelText('Para mandar ao médico por WhatsApp ou e-mail.'),
         AppButton(

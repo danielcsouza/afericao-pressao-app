@@ -148,7 +148,7 @@ void main() {
   });
 
   group('botões em Mais', () {
-    testWidgets('imprimir e exportar chamam o serviço com o arquivo certo', (
+    testWidgets('imprimir e compartilhar chamam o serviço com o arquivo certo', (
       tester,
     ) async {
       final svc = _FakeExport();
