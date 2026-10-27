@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/providers.dart';
 import 'anotar_tab.dart';
+import 'resumo_tab.dart';
 import 'theme.dart';
 
 /// Cabeçalho fixo, conteúdo da aba e barra inferior (Adendo B do plano).
@@ -41,7 +42,7 @@ class Shell extends ConsumerWidget {
                     index: tab,
                     children: const [
                       AnotarTab(),
-                      _TabPlaceholder('Resumo'),
+                      ResumoTab(),
                       _TabPlaceholder('Mais'),
                     ],
                   ),

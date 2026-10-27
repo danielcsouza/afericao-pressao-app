@@ -1,0 +1,198 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../domain/models.dart';
+import 'theme.dart';
+
+/// Painel das abas Resumo e Mais: cartão com borda de 1px, título e conteúdo.
+class Panel extends StatelessWidget {
+  const Panel({super.key, required this.title, required this.children});
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: c.card,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(cardRadius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
+/// Texto de apoio dos painéis (15px, cinza).
+class PanelText extends StatelessWidget {
+  const PanelText(this.text, {super.key, this.span});
+  final String text;
+  final InlineSpan? span;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(fontSize: 15, color: context.colors.muted);
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: span == null
+          ? Text(text, style: style)
+          : Text.rich(span!, style: style),
+    );
+  }
+}
+
+/// Botão pequeno e cheio (brand), "Usar hoje" etc.
+class SmallButton extends StatelessWidget {
+  const SmallButton(this.label, {super.key, required this.onTap});
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => FilledButton(
+    style: FilledButton.styleFrom(
+      backgroundColor: context.colors.headerColor,
+      foregroundColor: AppColors.brandInk,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    ),
+    onPressed: onTap,
+    child: Text(
+      label,
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+    ),
+  );
+}
+
+/// Chips de duração (7/15/30/60/90/outro), usados no Resumo e em Mais.
+class DaysChips extends StatelessWidget {
+  const DaysChips({super.key, required this.days, required this.onChanged});
+  final int days;
+  final ValueChanged<int> onChanged;
+
+  static const presets = [7, 15, 30, 60, 90];
+
+  @override
+  Widget build(BuildContext context) {
+    final custom = !presets.contains(days);
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final d in presets)
+          _DaysChip('$d', selected: d == days, onTap: () => onChanged(d)),
+        _DaysChip(
+          custom ? '$days' : 'Outro',
+          selected: custom,
+          onTap: () async {
+            final v = await askDays(context, custom ? days : null);
+            if (v != null) onChanged(v);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _DaysChip extends StatelessWidget {
+  const _DaysChip(this.label, {required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? c.brandSoft : Colors.transparent,
+          border: Border.all(color: selected ? c.brand : c.line, width: 2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: selected ? c.brand : c.ink,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Pergunta quantos dias (1–365). Devolve null se cancelar ou digitar algo inválido.
+Future<int?> askDays(BuildContext context, int? current) async {
+  final ctrl = TextEditingController(text: current == null ? '' : '$current');
+  final v = await showDialog<int>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Quantos dias?'),
+      content: TextField(
+        controller: ctrl,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(3),
+        ],
+        decoration: InputDecoration(
+          hintText: '${Config.minDays} a ${Config.maxDays}',
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, int.tryParse(ctrl.text)),
+          child: const Text('OK'),
+        ),
+      ],
+    ),
+  );
+  ctrl.dispose();
+  return v?.clamp(Config.minDays, Config.maxDays);
+}
+
+Future<bool> confirm(
+  BuildContext context, {
+  required String title,
+  required String message,
+  String ok = 'Continuar',
+}) async {
+  final r = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text('Cancelar'),
+        ),
+        TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(ok)),
+      ],
+    ),
+  );
+  return r == true;
+}
