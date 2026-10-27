@@ -46,3 +46,36 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# ---------------------------------------------------------------------------
+# SEGREDOS: nunca versionar. Se um destes arquivos aparecer no `git status`,
+# algo está errado. O modelo sem senhas é android/key.properties.example.
+# ---------------------------------------------------------------------------
+# Assinatura do app (keystore de upload e senhas do Gradle)
+key.properties
+**/key.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+
+# Chaves e certificados
+*.pem
+*.key
+*.crt
+
+# Variáveis de ambiente e credenciais
+.env
+.env.*
+!.env.example
+*service-account*.json
+*credentials*.json
+google-services.json
+GoogleService-Info.plist
+
+# Binários gerados (o .aab/.apk de release é artefato, não código)
+*.aab
+*.apk
+
+# Configuração local de cada máquina (caminhos do SDK)
+local.properties

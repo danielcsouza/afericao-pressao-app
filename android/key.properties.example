@@ -1,0 +1,7 @@
+# Modelo. Copie para android/key.properties (esse arquivo NÃO vai para o git)
+# e preencha com os dados do keystore de upload.
+storePassword=SENHA_DO_KEYSTORE
+keyPassword=SENHA_DO_KEYSTORE
+keyAlias=upload
+# Caminho absoluto do .jks, com barras normais (/), mesmo no Windows.
+storeFile=C:/Users/SEU_USUARIO/keystores/diario-pressao-upload.jks

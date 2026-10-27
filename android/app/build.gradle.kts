@@ -1,7 +1,17 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Assinatura de release: lê android/key.properties (fora do git; modelo em
+// key.properties.example). Sem o arquivo, o release cai na chave de debug só
+// para `flutter run --release`; o .aab para a Play exige o keystore (veja abaixo).
+val keystoreFile = rootProject.file("key.properties")
+val keystoreProps = Properties().apply {
+    if (keystoreFile.exists()) keystoreFile.inputStream().use { load(it) }
 }
 
 android {
@@ -31,12 +41,35 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (keystoreFile.exists()) {
+            create("release") {
+                keyAlias = keystoreProps["keyAlias"] as String
+                keyPassword = keystoreProps["keyPassword"] as String
+                storeFile = file(keystoreProps["storeFile"] as String)
+                storePassword = keystoreProps["storePassword"] as String
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (keystoreFile.exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
+    }
+}
+
+// Impede gerar um .aab de release assinado com a chave de debug (a Play recusa).
+gradle.taskGraph.whenReady {
+    if (!keystoreFile.exists() && allTasks.any { it.name.contains("bundleRelease") }) {
+        throw GradleException(
+            "android/key.properties não encontrado: o .aab de release precisa do " +
+                "keystore de upload. Copie key.properties.example e preencha.",
+        )
     }
 }
 
