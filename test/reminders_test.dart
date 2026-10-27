@@ -177,17 +177,14 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
 
-      // liberada, mas sem alarme exato: envia e avisa do atraso
+      // liberada: envia o teste
       svc.allowed = true;
-      svc.exact = false;
       await tester.tap(find.text('🔔 Enviar notificação de teste'));
       await tester.pumpAndSettle();
       expect(svc.tests, 1);
       expect(find.text('Teste enviado ✓'), findsOneWidget);
-      expect(find.textContaining('atrasar'), findsOneWidget);
-      await tester.tap(find.text('Liberar alarmes'));
+      await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
-      expect(svc.exactRequests, 1);
 
       // escolher "Avisar" pede a permissão
       await tester.tap(find.text('Não avisar'));
@@ -262,9 +259,7 @@ void main() {
 
 class _FakeService implements NotificationService {
   bool allowed = true;
-  bool exact = true;
   int permissionRequests = 0;
-  int exactRequests = 0;
   int tests = 0;
   final syncs = <List<PlannedReminder>>[];
 
@@ -272,17 +267,13 @@ class _FakeService implements NotificationService {
   Future<void> init() async {}
 
   @override
-  Future<NotificationStatus> status() async =>
-      NotificationStatus(notifications: allowed, exactAlarms: exact);
+  Future<bool> permissionGranted() async => allowed;
 
   @override
   Future<bool> requestPermission() async {
     permissionRequests++;
     return allowed;
   }
-
-  @override
-  Future<void> requestExactAlarms() async => exactRequests++;
 
   @override
   Future<void> sync(List<PlannedReminder> plan) async => syncs.add(plan);

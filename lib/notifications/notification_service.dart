@@ -6,29 +6,14 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../domain/reminders.dart';
 
-/// Situação das permissões que os lembretes precisam.
-class NotificationStatus {
-  const NotificationStatus({
-    required this.notifications,
-    required this.exactAlarms,
-  });
-
-  /// Notificações liberadas para o app (Android 13+ pede ao usuário).
-  final bool notifications;
-
-  /// Alarmes exatos liberados; sem isso o aviso pode atrasar alguns minutos.
-  final bool exactAlarms;
-}
-
 abstract class NotificationService {
   Future<void> init();
-  Future<NotificationStatus> status();
+
+  /// Notificações liberadas para o app (Android 13+ pede ao usuário).
+  Future<bool> permissionGranted();
 
   /// Pede a permissão de notificação. Devolve se ficou liberada.
   Future<bool> requestPermission();
-
-  /// Abre a tela do sistema para liberar alarmes exatos.
-  Future<void> requestExactAlarms();
 
   /// Troca os lembretes agendados por [plan].
   Future<void> sync(List<PlannedReminder> plan);
@@ -45,14 +30,10 @@ class NoopNotificationService implements NotificationService {
   Future<void> init() async {}
 
   @override
-  Future<NotificationStatus> status() async =>
-      const NotificationStatus(notifications: true, exactAlarms: true);
+  Future<bool> permissionGranted() async => true;
 
   @override
   Future<bool> requestPermission() async => true;
-
-  @override
-  Future<void> requestExactAlarms() async {}
 
   @override
   Future<void> sync(List<PlannedReminder> plan) async {}
@@ -100,22 +81,12 @@ class LocalNotificationService implements NotificationService {
   }
 
   @override
-  Future<NotificationStatus> status() async {
-    final a = _android;
-    return NotificationStatus(
-      notifications: await a?.areNotificationsEnabled() ?? false,
-      exactAlarms: await a?.canScheduleExactNotifications() ?? false,
-    );
-  }
+  Future<bool> permissionGranted() async =>
+      await _android?.areNotificationsEnabled() ?? false;
 
   @override
   Future<bool> requestPermission() async =>
       await _android?.requestNotificationsPermission() ?? false;
-
-  @override
-  Future<void> requestExactAlarms() async {
-    await _android?.requestExactAlarmsPermission();
-  }
 
   @override
   Future<void> sync(List<PlannedReminder> plan) {
@@ -127,7 +98,6 @@ class LocalNotificationService implements NotificationService {
   Future<void> _sync(List<PlannedReminder> plan) async {
     await _plugin.cancelAllPendingNotifications();
     if (plan.isEmpty) return;
-    final exact = await _android?.canScheduleExactNotifications() ?? false;
     for (final r in plan) {
       final p = r.period;
       await _plugin.zonedSchedule(
@@ -136,9 +106,9 @@ class LocalNotificationService implements NotificationService {
         body: 'Ainda não há anotação da ${p.label.toLowerCase()} de hoje.',
         scheduledDate: tz.TZDateTime.from(r.at, tz.local),
         notificationDetails: _details,
-        androidScheduleMode: exact
-            ? AndroidScheduleMode.exactAllowWhileIdle
-            : AndroidScheduleMode.inexactAllowWhileIdle,
+        // Inexato de propósito: não exige SCHEDULE_EXACT_ALARM (que pede
+        // justificativa na Play) e um atraso de alguns minutos não importa.
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
     }
   }
