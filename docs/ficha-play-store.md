@@ -127,18 +127,21 @@ release: só `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED` e `VIBRATE`; sem
   sem localização, câmera, microfone, SMS, etc.).
 - **App governamental / financeiro / notícias:** não.
 
-## 4. Gráficos
+## 4. Gráficos (prontos na pasta `store/`)
 
-| Item | Exigência da Play | Situação |
+| Item | Exigência da Play | Arquivo |
 | --- | --- | --- |
-| Ícone | PNG 512×512, até 1 MB | Pronto: `reference/icons/maskable-512.png` (sem cantos transparentes; a Play aplica a máscara) |
-| Imagem de destaque | PNG/JPEG 1024×500 | A criar |
-| Capturas de tela (celular) | mínimo 2, até 8; cada lado entre 320 e 3840 px; **o lado maior não pode passar de 2× o menor** | A criar. A tela do emulador (1080×2400) passa de 2:1 e seria recusada: capturar em 1080×1920 |
+| Ícone | PNG 512×512, até 1 MB | `store/icone-512.png` (sem cantos transparentes; a Play aplica a máscara) |
+| Imagem de destaque | PNG/JPEG 1024×500 | `store/imagem-destaque-1024x500.png` (gerada por `flutter test tool/gen_feature_graphic_test.dart`) |
+| Capturas de celular | mínimo 2, até 8; lado maior até 2× o menor | `store/capturas/01…07-*.png`, todas 1080×1920 (proporção 1,78) |
 
-Sugestão de capturas (ordem): 1) Anotar com valores preenchidos e selo
-"✓ completo"; 2) Agenda (progresso e grade dos dias); 3) médias e diferença entre
-braços; 4) lembretes em Ajustes; 5) folha impressa / PDF; 6) wizard (resumo).
-Usar dados de exemplo fictícios (não usar nome ou valores de pessoa real).
+Ordem sugerida das capturas: 01 Anotar (hoje) · 02 Anotar (dia completo) ·
+03 Agenda · 04 grade dos dias · 05 médias · 06 Ajustes (lembretes) · 07 Imprimir/Compartilhar.
+
+As capturas usam **dados fictícios** ("Maria", valores curtos como 12/8 e 13/8),
+barra de status limpa (modo demo do Android, 10:00) e tela 1080×1920. Para
+refazer: instalar o build de depuração, gravar o `FlutterSharedPreferences.xml`
+de exemplo com `adb run-as` e capturar com `adb exec-out screencap -p`.
 
 ## 5. Antes de enviar
 
