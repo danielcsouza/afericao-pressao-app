@@ -136,7 +136,7 @@ release: só `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED` e `VIBRATE`; sem
 | Capturas de celular | mínimo 2, até 8; lado maior até 2× o menor | `store/capturas/01…07-*.png`, todas 1080×1920 (proporção 1,78) |
 
 Ordem sugerida das capturas: 01 Anotar (hoje) · 02 Anotar (dia completo) ·
-03 Agenda · 04 grade dos dias · 05 médias · 06 Ajustes (lembretes) · 07 Imprimir/Compartilhar.
+03 Agenda · 04 grade dos dias · 05 médias · 06 Ajustes (lembretes) · 07 Imprimir/Compartilhar · 08 splash (a Play aceita até 8; pode ficar por último).
 
 As capturas usam **dados fictícios** ("Maria", valores curtos como 12/8 e 13/8),
 barra de status limpa (modo demo do Android, 10:00) e tela 1080×1920. Para
