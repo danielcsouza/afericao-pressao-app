@@ -93,9 +93,18 @@ release: só `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED` e `VIBRATE`; sem
 - **Classificação de conteúdo (questionário IARC):** responder "não" a violência,
   conteúdo sexual, drogas, jogos de azar, interação entre usuários e compartilhamento
   de localização. Espera-se a classificação mais baixa (Livre).
-- **Apps de saúde:** preencher a declaração de apps de saúde da Play. Descrever
-  como **caderno de anotações de medições feitas pelo próprio usuário**, sem
-  medir, diagnosticar ou tratar. O app não se conecta a sensores nem a aparelhos.
+- **Apps de saúde (etapa 1 de 2, "Recursos de saúde no seu app"):** marcar
+  **somente "Controle de doenças e condições médicas"** (Medicina). Definição da
+  Play: apps para gerenciar condições físicas agudas ou crônicas. É o caso de um
+  diário de pressão para quem acompanha hipertensão. **Não** marcar: "Meu app não
+  tem recursos de saúde" (o app registra dados de saúde); "Apps para dispositivos
+  médicos" (só para apps regulados: diagnóstico, recomendação de tratamento ou
+  interface com hardware médico; o app não mede, não interpreta e não se liga a
+  aparelhos); "Suporte à decisão clínica" (é para profissionais de saúde);
+  "Controle de medicamentos" (os lembretes são de anotar a pressão, não de remédio);
+  "Atividade e condicionamento físico" (a pressão aqui é clínica, não esportiva).
+  Se a etapa 2 pedir mais informações, descrever como **caderno de anotações de
+  medições feitas pelo próprio usuário**, sem medir, diagnosticar ou tratar.
 - **Permissões sensíveis / declarações extras:** nenhuma (sem alarme exato,
   sem localização, câmera, microfone, SMS, etc.).
 - **App governamental / financeiro / notícias:** não.
